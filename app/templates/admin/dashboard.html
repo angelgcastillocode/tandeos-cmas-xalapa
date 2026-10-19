@@ -1,0 +1,597 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Administración General — CMAS Xalapa{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block head_extra %}
+<style>
+  :root {
+    --adm-bg-dark: #0a0e1a;
+    --adm-card-dark: #111827;
+    --adm-card-border: #1f2937;
+    --adm-accent-blue: #0284c7;
+    --adm-accent-cyan: #06b6d4;
+    --adm-accent-emerald: #10b981;
+    --adm-accent-amber: #f59e0b;
+    --adm-accent-rose: #f43f5e;
+    --adm-text-light: #f3f4f6;
+    --adm-text-muted: #9ca3af;
+  }
+
+  body.bg-cmas-body {
+    background-color: var(--adm-bg-dark) !important;
+    color: var(--adm-text-light) !important;
+  }
+
+  .admin-header {
+    background: linear-gradient(135deg, #0b1329 0%, #172554 100%);
+    border-bottom: 1px solid var(--adm-card-border);
+  }
+
+  .adm-card {
+    background-color: var(--adm-card-dark);
+    border: 1px solid var(--adm-card-border);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  }
+
+  .adm-card-header {
+    background-color: rgba(31, 41, 55, 0.5);
+    border-bottom: 1px solid var(--adm-card-border);
+  }
+
+  .stat-card {
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .stat-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--adm-accent-cyan);
+  }
+
+  .adm-table {
+    color: var(--adm-text-light);
+  }
+  .adm-table th {
+    background-color: #1a2234;
+    color: var(--adm-text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-color: var(--adm-card-border);
+  }
+  .adm-table td {
+    background-color: transparent;
+    border-color: var(--adm-card-border);
+    vertical-align: middle;
+  }
+  .adm-table tr:hover td {
+    background-color: rgba(30, 41, 59, 0.6);
+  }
+
+  .adm-input {
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+    border: 1px solid #374151 !important;
+  }
+  .adm-input:focus {
+    border-color: var(--adm-accent-cyan) !important;
+    box-shadow: 0 0 0 0.2rem rgba(6, 182, 212, 0.25) !important;
+  }
+
+  .nav-pills .nav-link {
+    color: var(--adm-text-muted);
+    background: #111827;
+    border: 1px solid var(--adm-card-border);
+    margin-right: 0.5rem;
+    border-radius: 0.5rem;
+  }
+  .nav-pills .nav-link.active {
+    background: var(--adm-accent-blue);
+    color: #ffffff;
+    border-color: var(--adm-accent-cyan);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Encabezado Superior -->
+<header class="admin-header py-3 px-4 shadow-sm mb-4">
+  <div class="container-fluid d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <div class="d-flex align-items-center gap-3">
+      <div class="p-2 rounded-3 bg-primary bg-opacity-25 text-primary border border-primary border-opacity-50">
+        <i class="bi bi-gear-wide-connected fs-3"></i>
+      </div>
+      <div>
+        <div class="d-flex align-items-center gap-2">
+          <h1 class="h5 mb-0 fw-bold text-light">CMAS Xalapa — Administración General</h1>
+          <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50">Administrador General</span>
+        </div>
+        <p class="text-secondary small mb-0">Control global de tandeos, catálogo de colonias, avisos institucionales y moderación</p>
+      </div>
+    </div>
+
+    <!-- Acciones de Usuario -->
+    <div class="d-flex align-items-center gap-3">
+      <a href="{{ url_for('supervisor.dashboard') }}" class="btn btn-outline-info btn-sm d-flex align-items-center gap-1">
+        <i class="bi bi-speedometer2"></i>
+        <span>Panel de Supervisión</span>
+      </a>
+      <div class="text-end d-none d-sm-block">
+        <div class="small fw-semibold text-light">{{ usuario_nombre or 'Administrador' }}</div>
+        <span class="badge bg-secondary bg-opacity-50 text-light py-1 px-2 small">{{ usuario_rol or 'Administrador' }}</span>
+      </div>
+      <form method="POST" action="{{ url_for('auth.logout') }}" class="m-0">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1" title="Cerrar sesión">
+          <i class="bi bi-box-arrow-right"></i>
+          <span class="d-none d-md-inline">Salir</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</header>
+
+<div class="container-fluid px-4 pb-5">
+
+  <!-- ======================================================================== -->
+  <!-- 1. TARJETAS DE MÉTRICAS GENERALES DEL SISTEMA -->
+  <!-- ======================================================================== -->
+  <div class="row g-3 mb-4">
+    <!-- Colonias Reales -->
+    <div class="col-12 col-sm-6 col-xl-2">
+      <div class="adm-card stat-card p-3 h-100 border-start border-4 border-info">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-secondary small fw-medium">Colonias Xalapa</span>
+          <i class="bi bi-geo-alt text-info fs-5"></i>
+        </div>
+        <div class="h3 fw-bold text-light mb-1">{{ metricas.total_colonias }}</div>
+        <div class="small text-secondary">{{ metricas.total_sectores }} sectores oficiales</div>
+      </div>
+    </div>
+
+    <!-- Tandeos Programados -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="adm-card stat-card p-3 h-100 border-start border-4 border-primary">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-secondary small fw-medium">Programación Tandeos</span>
+          <i class="bi bi-calendar3 text-primary fs-5"></i>
+        </div>
+        <div class="h3 fw-bold text-light mb-1">{{ metricas.total_tandeos }}</div>
+        <div class="small text-secondary">
+          <span class="text-success fw-semibold">{{ metricas.tandeos_activos }}</span> activos | 
+          <span class="text-danger fw-semibold">{{ metricas.tandeos_suspendidos }}</span> suspendidos
+        </div>
+      </div>
+    </div>
+
+    <!-- Reportes Ciudadanos -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="adm-card stat-card p-3 h-100 border-start border-4 border-warning">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-secondary small fw-medium">Incidencias Totales</span>
+          <i class="bi bi-megaphone text-warning fs-5"></i>
+        </div>
+        <div class="h3 fw-bold text-light mb-1">{{ metricas.total_reportes }}</div>
+        <div class="small text-secondary">
+          <span class="text-warning fw-semibold">{{ metricas.reportes_abiertos }}</span> abiertos | 
+          <span class="text-success fw-semibold">{{ metricas.reportes_cerrados }}</span> cerrados
+        </div>
+      </div>
+    </div>
+
+    <!-- Avisos Institucionales -->
+    <div class="col-12 col-sm-6 col-xl-2">
+      <div class="adm-card stat-card p-3 h-100 border-start border-4 border-success">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-secondary small fw-medium">Avisos Activos</span>
+          <i class="bi bi-bell text-success fs-5"></i>
+        </div>
+        <div class="h3 fw-bold text-success mb-1">{{ metricas.avisos_activos }}</div>
+        <div class="small text-secondary">Alertas en portal</div>
+      </div>
+    </div>
+
+    <!-- Estado del Sistema -->
+    <div class="col-12 col-sm-6 col-xl-2">
+      <div class="adm-card stat-card p-3 h-100 border-start border-4 border-secondary">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-secondary small fw-medium">Motor SQLite</span>
+          <i class="bi bi-database-check text-info fs-5"></i>
+        </div>
+        <div class="h6 fw-bold text-success mb-1">Operativo 100%</div>
+        <div class="small text-secondary">database/tandeos.db</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================== -->
+  <!-- 2. NAVEGACIÓN POR PESTAÑAS: GESTIÓN DE TANDEOS, AVISOS Y REPORTES -->
+  <!-- ======================================================================== -->
+  <ul class="nav nav-pills mb-4" id="adminTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active d-flex align-items-center gap-2" id="tandeos-tab" data-bs-toggle="pill" data-bs-target="#tab-tandeos" type="button" role="tab">
+        <i class="bi bi-calendar-range"></i>
+        <span>Gestión de Calendarios de Tandeo</span>
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link d-flex align-items-center gap-2" id="avisos-tab" data-bs-toggle="pill" data-bs-target="#tab-avisos" type="button" role="tab">
+        <i class="bi bi-broadcast-pin"></i>
+        <span>Avisos y Alertas Institucionales</span>
+        {% if metricas.avisos_activos > 0 %}
+        <span class="badge bg-info text-dark">{{ metricas.avisos_activos }}</span>
+        {% endif %}
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link d-flex align-items-center gap-2" id="reportes-tab" data-bs-toggle="pill" data-bs-target="#tab-reportes" type="button" role="tab">
+        <i class="bi bi-check2-square"></i>
+        <span>Moderación de Reportes</span>
+        {% if metricas.reportes_abiertos > 0 %}
+        <span class="badge bg-warning text-dark">{{ metricas.reportes_abiertos }}</span>
+        {% endif %}
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="adminTabsContent">
+
+    <!-- ====================================================================== -->
+    <!-- TAB 1: GESTIÓN DE CALENDARIOS Y TANDEOS POR COLONIA -->
+    <!-- ====================================================================== -->
+    <div class="tab-pane fade show active" id="tab-tandeos" role="tabpanel">
+      <div class="row g-4">
+        <!-- Formulario Alta / Actualización de Tandeo -->
+        <div class="col-12 col-xl-4">
+          <div class="adm-card h-100">
+            <div class="adm-card-header p-3">
+              <h2 class="h6 mb-0 fw-bold text-light">
+                <i class="bi bi-plus-circle text-info me-1"></i> Asignar / Actualizar Tandeo
+              </h2>
+            </div>
+            <div class="p-3">
+              <form method="POST" action="{{ url_for('admin.tandeos_guardar') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+                <!-- Selector de Colonia -->
+                <div class="mb-3">
+                  <label for="id_colonia" class="form-label text-secondary small fw-medium">Colonia</label>
+                  <select name="id_colonia" id="id_colonia" class="form-select form-select-sm adm-input" required>
+                    <option value="">-- Seleccionar Colonia --</option>
+                    {% for c in colonias %}
+                    <option value="{{ c.id_colonia }}">{{ c.nombre }} (CP {{ c.codigo_postal }})</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <!-- Día de la Semana -->
+                <div class="mb-3">
+                  <label for="dia_semana" class="form-label text-secondary small fw-medium">Día de Suministro</label>
+                  <select name="dia_semana" id="dia_semana" class="form-select form-select-sm adm-input" required>
+                    {% for d in dias_semana %}
+                    <option value="{{ d }}">{{ d }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <!-- Rango de Horarios -->
+                <div class="row g-2 mb-3">
+                  <div class="col-6">
+                    <label for="hora_inicio" class="form-label text-secondary small fw-medium">Hora Inicio</label>
+                    <input type="text" name="hora_inicio" id="hora_inicio" class="form-control form-control-sm adm-input" placeholder="06:00" value="06:00" required>
+                  </div>
+                  <div class="col-6">
+                    <label for="hora_fin" class="form-label text-secondary small fw-medium">Hora Fin</label>
+                    <input type="text" name="hora_fin" id="hora_fin" class="form-control form-control-sm adm-input" placeholder="22:00" value="22:00" required>
+                  </div>
+                </div>
+
+                <!-- Estado del Servicio -->
+                <div class="mb-3">
+                  <label for="estado_servicio" class="form-label text-secondary small fw-medium">Estado del Servicio</label>
+                  <select name="estado_servicio" id="estado_servicio" class="form-select form-select-sm adm-input" required>
+                    <option value="Activo">Activo (Suministro en red)</option>
+                    <option value="Suspendido">Suspendido (Tandeo cerrado)</option>
+                    <option value="Mantenimiento">Mantenimiento (Rebombeo/Reparación)</option>
+                  </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-sm w-100 fw-medium">
+                  <i class="bi bi-save me-1"></i> Guardar Programación
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla de Tandeos Existentes -->
+        <div class="col-12 col-xl-8">
+          <div class="adm-card h-100">
+            <div class="adm-card-header p-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+              <h2 class="h6 mb-0 fw-bold text-light">
+                <i class="bi bi-list-columns-reverse text-info me-1"></i> Programación Oficial Registrada
+              </h2>
+              <form method="GET" action="{{ url_for('admin.dashboard') }}" class="d-flex gap-2">
+                <input type="text" name="q" class="form-control form-control-sm adm-input" placeholder="Buscar colonia o CP..." value="{{ filtros.q or '' }}" style="width: 220px;">
+                <button type="submit" class="btn btn-outline-info btn-sm">Buscar</button>
+              </form>
+            </div>
+            <div class="table-responsive">
+              <table class="table adm-table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Colonia / Sector</th>
+                    <th>Día</th>
+                    <th>Horario</th>
+                    <th>Estado</th>
+                    <th>Última Actualización</th>
+                    <th class="text-end">Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if tandeos %}
+                    {% for t in tandeos %}
+                    <tr>
+                      <td>
+                        <div class="fw-semibold text-light">{{ t.nombre_colonia }}</div>
+                        <small class="text-secondary">{{ t.nombre_sector or 'Sector general' }} (CP {{ t.codigo_postal }})</small>
+                      </td>
+                      <td>
+                        <span class="badge bg-secondary bg-opacity-50 text-light">{{ t.dia_semana }}</span>
+                      </td>
+                      <td><small class="text-light">{{ t.hora_inicio }} - {{ t.hora_fin }}</small></td>
+                      <td>
+                        {% if t.estado_servicio == 'Activo' %}
+                          <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">Activo</span>
+                        {% elif t.estado_servicio == 'Suspendido' %}
+                          <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50">Suspendido</span>
+                        {% else %}
+                          <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50">Mantenimiento</span>
+                        {% endif %}
+                      </td>
+                      <td><small class="text-secondary">{{ t.fecha_actualizacion }}</small></td>
+                      <td class="text-end">
+                        <form method="POST" action="{{ url_for('admin.tandeos_eliminar', id_programacion=t.id_programacion) }}" class="d-inline" onsubmit="return confirm('¿Confirmas la eliminación de esta regla de tandeo?');">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                          <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" title="Eliminar regla">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr>
+                      <td colspan="6" class="text-center py-4 text-secondary">
+                        No hay registros de tandeo coincidentes con el criterio de búsqueda.
+                      </td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================== -->
+    <!-- TAB 2: PUBLICACIÓN Y GESTIÓN DE AVISOS INSTITUCIONALES -->
+    <!-- ====================================================================== -->
+    <div class="tab-pane fade" id="tab-avisos" role="tabpanel">
+      <div class="row g-4">
+        <!-- Formulario Publicar Aviso -->
+        <div class="col-12 col-xl-4">
+          <div class="adm-card h-100">
+            <div class="adm-card-header p-3">
+              <h2 class="h6 mb-0 fw-bold text-light">
+                <i class="bi bi-megaphone-fill text-warning me-1"></i> Publicar Alerta / Aviso Oficial
+              </h2>
+            </div>
+            <div class="p-3">
+              <form method="POST" action="{{ url_for('admin.avisos_crear') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+                <div class="mb-3">
+                  <label for="titulo" class="form-label text-secondary small fw-medium">Título del Aviso</label>
+                  <input type="text" name="titulo" id="titulo" class="form-control form-control-sm adm-input" placeholder="Ej. Suspensión temporal por fuga..." required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="prioridad" class="form-label text-secondary small fw-medium">Nivel de Prioridad</label>
+                  <select name="prioridad" id="prioridad" class="form-select form-select-sm adm-input" required>
+                    <option value="Normal">Normal (Informativo general)</option>
+                    <option value="Alta">Alta (Cortes programados)</option>
+                    <option value="Urgente">Urgente (Falla mayor / Emergencia)</option>
+                    <option value="Baja">Baja (Recomendación ciudadana)</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label for="id_sector_aviso" class="form-label text-secondary small fw-medium">Sector Afectado</label>
+                  <select name="id_sector" id="id_sector_aviso" class="form-select form-select-sm adm-input">
+                    <option value="">-- Todo el Municipio de Xalapa --</option>
+                    {% for s in sectores %}
+                    <option value="{{ s.id_sector }}">{{ s.nombre }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label for="contenido" class="form-label text-secondary small fw-medium">Detalle del Comunicado</label>
+                  <textarea name="contenido" id="contenido" rows="4" class="form-control form-control-sm adm-input" placeholder="Describe los horarios estimados de restablecimiento o cuadrillas asignadas..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-warning btn-sm w-100 fw-medium text-dark">
+                  <i class="bi bi-broadcast me-1"></i> Difundir Comunicado
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de Avisos -->
+        <div class="col-12 col-xl-8">
+          <div class="adm-card h-100">
+            <div class="adm-card-header p-3">
+              <h2 class="h6 mb-0 fw-bold text-light">
+                <i class="bi bi-bell-fill text-info me-1"></i> Avisos Vigentes e Historial
+              </h2>
+            </div>
+            <div class="table-responsive">
+              <table class="table adm-table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Prioridad</th>
+                    <th>Título / Contenido</th>
+                    <th>Alcance</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                    <th class="text-end">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if avisos %}
+                    {% for a in avisos %}
+                    <tr>
+                      <td>
+                        {% if a.prioridad == 'Urgente' %}
+                          <span class="badge bg-danger text-light">Urgente</span>
+                        {% elif a.prioridad == 'Alta' %}
+                          <span class="badge bg-warning text-dark">Alta</span>
+                        {% elif a.prioridad == 'Normal' %}
+                          <span class="badge bg-info text-dark">Normal</span>
+                        {% else %}
+                          <span class="badge bg-secondary text-light">Baja</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        <div class="fw-semibold text-light">{{ a.titulo }}</div>
+                        <small class="text-secondary">{{ a.contenido[:80] }}{% if a.contenido|length > 80 %}...{% endif %}</small>
+                      </td>
+                      <td><small class="text-light">{{ a.nombre_sector or 'Municipal General' }}</small></td>
+                      <td>
+                        {% if a.activo == 1 %}
+                          <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">Activo</span>
+                        {% else %}
+                          <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-50">Oculto</span>
+                        {% endif %}
+                      </td>
+                      <td><small class="text-secondary">{{ a.fecha_publicacion }}</small></td>
+                      <td class="text-end">
+                        <form method="POST" action="{{ url_for('admin.avisos_alternar', id_aviso=a.id_aviso) }}" class="d-inline">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                          <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-2" title="Alternar visibilidad">
+                            <i class="bi bi-power"></i>
+                          </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('admin.avisos_eliminar', id_aviso=a.id_aviso) }}" class="d-inline ms-1" onsubmit="return confirm('¿Eliminar aviso definitivamente?');">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                          <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr>
+                      <td colspan="6" class="text-center py-4 text-secondary">
+                        No hay avisos o alertas publicadas actualmente.
+                      </td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================== -->
+    <!-- TAB 3: MODERACIÓN DE REPORTES CIUDADANOS -->
+    <!-- ====================================================================== -->
+    <div class="tab-pane fade" id="tab-reportes" role="tabpanel">
+      <div class="adm-card">
+        <div class="adm-card-header p-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <h2 class="h6 mb-0 fw-bold text-light">
+            <i class="bi bi-shield-check text-info me-1"></i> Moderación y Resolución de Incidencias Ciudadanas
+          </h2>
+          <form method="GET" action="{{ url_for('admin.dashboard') }}" class="d-flex gap-2">
+            <select name="estado_rep" class="form-select form-select-sm adm-input" style="width: 140px;">
+              <option value="">Todos los Estados</option>
+              <option value="Abierto" {% if filtros.estado_rep == 'Abierto' %}selected{% endif %}>Abierto</option>
+              <option value="En proceso" {% if filtros.estado_rep == 'En proceso' %}selected{% endif %}>En proceso</option>
+              <option value="Cerrado" {% if filtros.estado_rep == 'Cerrado' %}selected{% endif %}>Cerrado</option>
+            </select>
+            <button type="submit" class="btn btn-outline-info btn-sm">Filtrar</button>
+          </form>
+        </div>
+        <div class="table-responsive">
+          <table class="table adm-table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Folio</th>
+                <th>Fecha</th>
+                <th>Colonia / Sector</th>
+                <th>Incidencia</th>
+                <th>Descripción</th>
+                <th>Estado Actual</th>
+                <th class="text-end">Moderación</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if reportes %}
+                {% for r in reportes %}
+                <tr>
+                  <td><span class="fw-bold text-info">{{ r.folio }}</span></td>
+                  <td><small class="text-light">{{ r.fecha_hora_reporte }}</small></td>
+                  <td>
+                    <div class="fw-semibold text-light">{{ r.nombre_colonia }}</div>
+                    <small class="text-secondary">{{ r.nombre_sector or 'Sector general' }}</small>
+                  </td>
+                  <td><span class="badge bg-secondary bg-opacity-50 text-light">{{ r.tipo_incidencia }}</span></td>
+                  <td><small class="text-secondary">{{ r.descripcion[:70] }}{% if r.descripcion|length > 70 %}...{% endif %}</small></td>
+                  <td>
+                    {% if r.estado == 'Abierto' %}
+                      <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50">Abierto</span>
+                    {% elif r.estado == 'En proceso' %}
+                      <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50">En proceso</span>
+                    {% else %}
+                      <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">Cerrado</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end">
+                    <form method="POST" action="{{ url_for('admin.reportes_moderar', id_reporte=r.id_reporte) }}" class="d-inline-flex gap-1 align-items-center">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                      <select name="nuevo_estado" class="form-select form-select-sm adm-input" style="width: auto; font-size: 0.75rem;">
+                        <option value="Abierto" {% if r.estado == 'Abierto' %}selected{% endif %}>Abierto</option>
+                        <option value="En proceso" {% if r.estado == 'En proceso' %}selected{% endif %}>En proceso</option>
+                        <option value="Cerrado" {% if r.estado == 'Cerrado' %}selected{% endif %}>Cerrado</option>
+                      </select>
+                      <button type="submit" class="btn btn-outline-info btn-sm py-0 px-2" title="Guardar moderación">
+                        <i class="bi bi-check2"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="7" class="text-center py-4 text-secondary">
+                    No hay incidencias que requieran moderación en este momento.
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

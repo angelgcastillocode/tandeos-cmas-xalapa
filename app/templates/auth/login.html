@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión — Plataforma de Tandeos CMAS{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card card shadow-sm">
+    <div class="card-body p-4 p-md-5">
+
+      <!-- Logotipos Institucionales CMAS & ITSX -->
+      <div class="auth-header-logos">
+        <img
+          src="{{ url_for('static', filename='img/logo_cmas.png') }}"
+          alt="Logotipo CMAS Xalapa"
+          class="logo-item"
+          height="52">
+        <div class="logo-divider"></div>
+        <img
+          src="{{ url_for('static', filename='img/logo_itsx.png') }}"
+          alt="Logotipo ITSX"
+          class="logo-item"
+          height="48">
+      </div>
+
+      <!-- Título de la Plataforma -->
+      <div class="text-center mb-4">
+        <h1 class="auth-title mb-1">Plataforma de Tandeos CMAS</h1>
+        <p class="auth-subtitle mb-0">Portal institucional de gestión y consulta</p>
+      </div>
+
+      <!-- Formulario de Autenticación -->
+      <form
+        id="loginForm"
+        method="POST"
+        action="{{ url_for('auth.login_submit') }}"
+        class="needs-validation"
+        novalidate>
+        
+        <!-- Token de Seguridad CSRF Obligatorio -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <!-- Campo Correo Electrónico -->
+        <div class="mb-3">
+          <label for="correo" class="form-label">Correo electrónico</label>
+          <div class="input-group has-validation">
+            <span class="input-group-text" id="correoIcon">
+              <i class="bi bi-envelope"></i>
+            </span>
+            <input
+              type="email"
+              class="form-control"
+              id="correo"
+              name="correo"
+              placeholder="nombre@cmas.gob.mx"
+              autocomplete="username"
+              required
+              aria-describedby="correoIcon correoFeedback">
+            <div id="correoFeedback" class="invalid-feedback">
+              Por favor ingrese un correo electrónico válido.
+            </div>
+          </div>
+        </div>
+
+        <!-- Campo Contraseña -->
+        <div class="mb-4">
+          <label for="password" class="form-label">Contraseña</label>
+          <div class="input-group has-validation">
+            <span class="input-group-text" id="passwordIcon">
+              <i class="bi bi-lock"></i>
+            </span>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+              aria-describedby="passwordIcon passwordFeedback togglePassword">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              id="togglePassword"
+              aria-label="Mostrar contraseña"
+              aria-pressed="false"
+              tabindex="-1">
+              <span class="visually-hidden">Mostrar u ocultar contraseña</span>
+              <i class="bi bi-eye" id="togglePasswordIcon" aria-hidden="true"></i>
+            </button>
+            <div id="passwordFeedback" class="invalid-feedback">
+              Por favor ingrese su contraseña.
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón Iniciar Sesión -->
+        <button type="submit" class="btn btn-cmas-primary w-100" id="btnLogin">
+          <span
+            class="spinner-border spinner-border-sm d-none me-2"
+            id="loginSpinner"
+            role="status"
+            aria-hidden="true"></span>
+          <span id="btnLoginText">Iniciar sesión</span>
+        </button>
+      </form>
+
+      <!-- Sección de Registro de Nuevos Usuarios -->
+      <div class="text-center mt-3 pt-2">
+        <p class="text-muted small mb-2">¿No tienes una cuenta ciudadana?</p>
+        <a href="{{ url_for('auth.register_form') }}" class="btn btn-outline-primary w-100 fw-semibold d-inline-flex align-items-center justify-content-center gap-2" id="btnIrRegistro">
+          <i class="bi bi-person-plus-fill" aria-hidden="true"></i>
+          <span>Registrarse como Nuevo Usuario</span>
+        </a>
+      </div>
+
+      <!-- Enlaces de Ayuda y Navegación -->
+      <div class="d-flex justify-content-between align-items-center mt-4 pt-2 border-top small">
+        <a href="{{ url_for('auth.login_form') }}#" class="link-cmas">
+          <i class="bi bi-question-circle me-1"></i>¿Olvidaste tu contraseña?
+        </a>
+        <a href="/" class="link-secondary-nav">
+          <i class="bi bi-arrow-left me-1"></i>Regresar al inicio
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

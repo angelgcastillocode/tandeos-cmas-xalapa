@@ -1,0 +1,721 @@
+:root {
+  --cmas-primary: #0066CC;
+  --cmas-primary-hover: #004E9C;
+  --cmas-bg-body: #F4F7FB;
+  --cmas-card-bg: #FFFFFF;
+  --cmas-text: #333333;
+  --cmas-muted: #6C757D;
+  --cmas-border: #E2E8F0;
+}
+
+body.bg-cmas-body {
+  background-color: var(--cmas-bg-body);
+  color: var(--cmas-text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+}
+
+.text-cmas-dark {
+  color: var(--cmas-text) !important;
+}
+
+.text-cmas-primary {
+  color: var(--cmas-primary) !important;
+}
+
+.app-main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Contenedor central de autenticación */
+.auth-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+/* Tarjeta de Login */
+.auth-card {
+  width: 100%;
+  max-width: 460px;
+  background-color: var(--cmas-card-bg);
+  border: 1px solid var(--cmas-border);
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 102, 204, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Logos institucionales */
+.auth-header-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.logo-item {
+  max-height: 52px;
+  max-width: 130px;
+  object-fit: contain;
+  transition: opacity 0.2s ease;
+}
+
+.logo-divider {
+  width: 1px;
+  height: 38px;
+  background-color: var(--cmas-border);
+}
+
+/* Títulos */
+.auth-title {
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--cmas-text);
+  letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+  color: var(--cmas-muted);
+  font-size: 0.9rem;
+}
+
+/* Inputs y Formularios */
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.35rem;
+}
+
+.input-group-text {
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
+  color: #64748B;
+}
+
+.form-control {
+  border-color: #CBD5E1;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  color: var(--cmas-text);
+  border-radius: 0.5rem;
+}
+
+.input-group > .form-control {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input-group > .btn {
+  border-color: #CBD5E1;
+  background-color: #F8FAFC;
+  color: #64748B;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.input-group > .btn:hover {
+  background-color: #EDF2F7;
+  color: var(--cmas-primary);
+}
+
+.form-control:focus {
+  border-color: var(--cmas-primary);
+  box-shadow: 0 0 0 0.25rem rgba(0, 102, 204, 0.18);
+}
+
+/* Botón institucional primario */
+.btn-cmas-primary {
+  background-color: var(--cmas-primary);
+  border-color: var(--cmas-primary);
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  padding: 0.7rem 1.25rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-cmas-primary:hover,
+.btn-cmas-primary:focus {
+  background-color: var(--cmas-primary-hover);
+  border-color: var(--cmas-primary-hover);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.25);
+}
+
+.btn-cmas-primary:disabled {
+  background-color: #93C5FD;
+  border-color: #93C5FD;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+/* Enlaces */
+.link-cmas {
+  color: var(--cmas-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.link-cmas:hover {
+  color: var(--cmas-primary-hover);
+  text-decoration: underline;
+}
+
+.link-secondary-nav {
+  color: var(--cmas-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.link-secondary-nav:hover {
+  color: var(--cmas-text);
+  text-decoration: underline;
+}
+
+/* Contenedor Flotante de Mensajes Flash */
+.flash-container {
+  position: fixed;
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1090;
+  width: min(92vw, 440px);
+}
+
+.flash-container .alert {
+  border-radius: 0.6rem;
+  margin-bottom: 0.6rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Responsividad Auth */
+@media (max-width: 576px) {
+  .auth-wrapper {
+    padding: 1rem 0.75rem;
+  }
+  .auth-card {
+    border-radius: 0.75rem;
+  }
+  .auth-card .card-body {
+    padding: 1.5rem !important;
+  }
+  .logo-item {
+    max-height: 44px;
+    max-width: 105px;
+  }
+}
+
+/* ==========================================================================
+   PORTAL PÚBLICO: HERO, BUSCADOR, CALENDARIO SEMANAL Y FOOTER
+   ========================================================================== */
+
+/* Navbar Público */
+.cmas-navbar {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid var(--cmas-border);
+  padding: 0.85rem 0;
+}
+
+.cmas-navbar .navbar-brand {
+  color: var(--cmas-text);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.cmas-navbar .navbar-brand:hover {
+  color: var(--cmas-primary);
+}
+
+.btn-outline-cmas {
+  border: 1.5px solid var(--cmas-primary);
+  color: var(--cmas-primary);
+  font-weight: 600;
+  border-radius: 0.5rem;
+  padding: 0.45rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-cmas:hover,
+.btn-outline-cmas:focus {
+  background-color: var(--cmas-primary);
+  color: #FFFFFF;
+  box-shadow: 0 4px 10px rgba(0, 102, 204, 0.2);
+}
+
+/* Botón y Dropdown de Usuario Autenticado en Navbar */
+.btn-cmas-user {
+  background: linear-gradient(135deg, #0b1329 0%, #172554 100%);
+  color: #f8fafc;
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  font-weight: 600;
+  border-radius: 0.5rem;
+  padding: 0.42rem 0.95rem;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-cmas-user:hover,
+.btn-cmas-user:focus,
+.btn-cmas-user.show {
+  background: linear-gradient(135deg, #172554 0%, #0369a1 100%);
+  color: #ffffff;
+  border-color: #06b6d4;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-cmas-user .user-nav-name {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Menú Desplegable con Paleta Institucional Oscura (Cian / Ámbar) */
+.cmas-dropdown-menu {
+  background-color: #0b1329;
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  min-width: 250px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.18) !important;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cmas-dropdown-menu .dropdown-header {
+  color: #94a3b8;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.cmas-dropdown-menu .dropdown-item {
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.cmas-dropdown-menu .dropdown-item:hover,
+.cmas-dropdown-menu .dropdown-item:focus {
+  background-color: rgba(6, 182, 212, 0.18);
+  color: #38bdf8;
+  transform: translateX(3px);
+}
+
+.cmas-dropdown-menu .dropdown-item i.bi-bell-fill {
+  color: #f59e0b !important;
+}
+
+.cmas-dropdown-menu .dropdown-item:hover i.bi-bell-fill {
+  color: #fbbf24 !important;
+  text-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+.cmas-dropdown-menu .dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.cmas-dropdown-menu button.dropdown-item.text-danger:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171 !important;
+}
+
+/* Hero Section */
+.hero-public {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F4F7FB 100%);
+  padding: 3.5rem 1rem 2.5rem;
+  border-bottom: 1px solid var(--cmas-border);
+}
+
+.hero-public-title {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 800;
+  color: var(--cmas-text);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.hero-public-subtitle {
+  color: #4A5568;
+  font-size: 1.1rem;
+  max-width: 660px;
+  margin: 0 auto;
+}
+
+/* Buscador Público */
+.search-card-container {
+  max-width: 660px;
+  margin: 1.75rem auto 0;
+}
+
+.search-input-wrapper {
+  background-color: #FFFFFF;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 102, 204, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  border: 1.5px solid #CBD5E1;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input-wrapper:focus-within {
+  border-color: var(--cmas-primary);
+  box-shadow: 0 0 0 0.25rem rgba(0, 102, 204, 0.2);
+}
+
+.search-input {
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 1.05rem;
+  padding: 0.85rem 1rem;
+  color: var(--cmas-text);
+}
+
+.search-input::placeholder {
+  color: #94A3B8;
+}
+
+.btn-search-cmas {
+  background-color: var(--cmas-primary);
+  border-color: var(--cmas-primary);
+  color: #FFFFFF;
+  font-weight: 600;
+  border-radius: 0.6rem;
+  margin: 0.3rem;
+  padding: 0.65rem 1.4rem;
+  transition: all 0.2s ease;
+}
+
+.btn-search-cmas:hover {
+  background-color: var(--cmas-primary-hover);
+  border-color: var(--cmas-primary-hover);
+  color: #FFFFFF;
+}
+
+/* Tags de Sugerencias */
+.search-suggestions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn-suggestion-tag {
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.btn-suggestion-tag:hover {
+  border-color: var(--cmas-primary);
+  color: var(--cmas-primary);
+  background-color: #EFF6FF;
+}
+
+/* Tarjeta de Información de Sector */
+.sector-info-card {
+  background-color: #FFFFFF;
+  border: 1px solid var(--cmas-border);
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Calendario Semanal */
+.calendar-grid-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.75rem;
+}
+
+.day-schedule-card {
+  background-color: #FFFFFF;
+  border: 1px solid var(--cmas-border);
+  border-radius: 0.75rem;
+  padding: 1rem 0.5rem;
+  text-align: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+}
+
+.day-schedule-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.06);
+}
+
+.day-schedule-card.today {
+  border: 2px solid var(--cmas-primary);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+}
+
+.day-schedule-card.status-activo {
+  border-top: 4px solid #16A34A;
+  background-color: #F0FDF4;
+}
+
+.day-schedule-card.status-suspendido {
+  border-top: 4px solid #DC2626;
+  background-color: #FEF2F2;
+}
+
+.day-schedule-card.status-mantenimiento {
+  border-top: 4px solid #D97706;
+  background-color: #FFFBEB;
+}
+
+.day-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--cmas-text);
+  margin-bottom: 0.35rem;
+}
+
+.badge-status-activo {
+  background-color: #DCFCE7;
+  color: #15803D;
+  font-weight: 600;
+  border: 1px solid #86EFAC;
+}
+
+.badge-status-suspendido {
+  background-color: #FEE2E2;
+  color: #991B1B;
+  font-weight: 600;
+  border: 1px solid #FCA5A5;
+}
+
+.badge-status-mantenimiento {
+  background-color: #FEF3C7;
+  color: #92400E;
+  font-weight: 600;
+  border: 1px solid #FCD34D;
+}
+
+.schedule-hours {
+  font-size: 0.825rem;
+  color: #475569;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+/* Responsividad para Calendario */
+@media (max-width: 991px) {
+  .calendar-grid-week {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .calendar-grid-week {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Footer Público */
+.cmas-footer {
+  background-color: #FFFFFF;
+  border-top: 1px solid var(--cmas-border);
+  padding: 2.25rem 0 1.5rem;
+  margin-top: auto;
+  color: #4A5568;
+  font-size: 0.9rem;
+}
+
+.footer-link {
+  color: #64748B;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.footer-link:hover {
+  color: var(--cmas-primary);
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   MÓDULO CALENDARIO DE TANDEOS (CU-001) - DISEÑO INSTITUCIONAL OSCURO
+   ========================================================================== */
+
+/* Cabecera oscura institucional CMAS */
+.cmas-search-hero-dark {
+  background: linear-gradient(135deg, #0A192F 0%, #1E293B 100%);
+  border-bottom: 2px solid #0284C7;
+  position: relative;
+}
+
+.search-form-consulta {
+  position: relative;
+}
+
+.search-form-consulta .input-group {
+  border-radius: 0.6rem;
+  overflow: hidden;
+}
+
+/* Dropdown de Autocompletado */
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 0.5rem;
+  margin-top: 0.35rem;
+  z-index: 1050;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  color: #1E293B;
+  text-decoration: none;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #F1F5F9;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+  background-color: #EFF6FF;
+  color: var(--cmas-primary);
+}
+
+.autocomplete-item .item-meta {
+  font-size: 0.775rem;
+  color: #64748B;
+}
+
+/* Ficha de Información de Colonia y Sector */
+.cmas-info-card {
+  background-color: #FFFFFF;
+  border: 1px solid var(--cmas-border);
+  border-radius: 1rem;
+  border-left: 6px solid var(--cmas-primary);
+}
+
+.fiabilidad-box {
+  min-width: 200px;
+  background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
+}
+
+/* Leyenda de Accesibilidad */
+.accessibility-legend-bar {
+  background-color: #FFFFFF;
+  border: 1px solid var(--cmas-border);
+}
+
+/* Estados accesibles mejorados con íconos y contrastes WCAG */
+.badge-status-activo {
+  background-color: #DCFCE7 !important;
+  color: #14532D !important;
+  font-weight: 700;
+  border: 1px solid #86EFAC;
+}
+
+.badge-status-suspendido {
+  background-color: #FEE2E2 !important;
+  color: #7F1D1D !important;
+  font-weight: 700;
+  border: 1px solid #FCA5A5;
+}
+
+.badge-status-mantenimiento {
+  background-color: #FEF3C7 !important;
+  color: #78350F !important;
+  font-weight: 700;
+  border: 1px solid #FCD34D;
+}
+
+/* Tarjeta del Día en Calendario Semanal */
+.day-schedule-card {
+  outline: none;
+}
+
+.day-schedule-card:focus-visible {
+  ring: 2px solid var(--cmas-primary);
+  border-color: var(--cmas-primary);
+}
+
+.day-schedule-card.status-activo {
+  border-top: 5px solid #16A34A;
+  background: linear-gradient(180deg, #F0FDF4 0%, #FFFFFF 100%);
+}
+
+.day-schedule-card.status-suspendido {
+  border-top: 5px solid #DC2626;
+  background: linear-gradient(180deg, #FEF2F2 0%, #FFFFFF 100%);
+}
+
+.day-schedule-card.status-mantenimiento {
+  border-top: 5px solid #D97706;
+  background: linear-gradient(180deg, #FFFBEB 0%, #FFFFFF 100%);
+}
+
+.smaller {
+  font-size: 0.75rem;
+}
+
+.max-w-500 {
+  max-width: 500px;
+}
+
+.max-w-600 {
+  max-width: 600px;
+}
+
+/* Tarjetas de Casos Vacíos */
+.cmas-empty-state-card {
+  max-width: 640px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--cmas-border);
+  border-radius: 1.25rem;
+}
+
+.cmas-coincidencias-box {
+  background-color: #FFFFFF;
+}
+
+

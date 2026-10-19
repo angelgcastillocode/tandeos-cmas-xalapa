@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Reporte Registrado — Folio #{{ reporte.folio }} — CMAS Xalapa{% endblock %}
+
+{% block navbar_extra %}
+<a href="/" class="btn btn-sm btn-outline-cmas d-inline-flex align-items-center gap-1">
+  <i class="bi bi-search" aria-hidden="true"></i>
+  <span>Nueva Consulta</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Cabecera Institucional Oscura -->
+<section class="cmas-search-hero-dark py-4 text-white text-center">
+  <div class="container">
+    <div class="max-w-600 mx-auto">
+      <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 small fw-semibold mb-2">
+        <i class="bi bi-check-circle-fill me-1"></i>Recepción Confirmada
+      </span>
+      <h1 class="h3 fw-bold mb-1 text-white">
+        Reporte Registrado Correctamente
+      </h1>
+      <p class="text-white-50 small mb-0">
+        Tu incidencia ha sido turnada al centro de monitoreo operativo de CMAS Xalapa.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Tarjeta de Confirmación con Folio Único -->
+<div class="container py-4 my-2">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+
+      <div class="cmas-info-card p-4 p-md-5 text-center shadow-sm">
+        
+        <!-- Ícono de Éxito -->
+        <div class="mb-3 text-success">
+          <i class="bi bi-check-circle-fill" style="font-size: 3.8rem;" aria-hidden="true"></i>
+        </div>
+
+        <h2 class="h3 fw-bold text-cmas-dark mb-2">
+          ¡Gracias por tu reporte!
+        </h2>
+        <p class="text-muted small max-w-500 mx-auto mb-4">
+          Conserva el siguiente número de folio para dar seguimiento al estado de atención con nuestras cuadrillas operativas.
+        </p>
+
+        <!-- Caja Destacada con el Folio Único -->
+        <div class="p-3 p-md-4 rounded-4 mb-4 border" style="background: linear-gradient(135deg, #0A192F 0%, #1E293B 100%); color: #FFFFFF;">
+          <div class="small text-white-50 text-uppercase fw-semibold tracking-wide mb-1">
+            Número de Folio Oficial
+          </div>
+          <div class="display-6 fw-bold text-warning letter-spacing-1 font-monospace" id="folioTexto">
+            #{{ reporte.folio }}
+          </div>
+          <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
+            <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold">
+              <i class="bi bi-hourglass-split me-1"></i>Estado: {{ reporte.estado }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Ficha Resumen de la Incidencia -->
+        <div class="text-start bg-light rounded-3 p-4 border mb-4">
+          <h3 class="h6 fw-bold text-secondary text-uppercase border-bottom pb-2 mb-3">
+            <i class="bi bi-receipt me-1 text-primary"></i>Detalles del Registro
+          </h3>
+          <div class="row g-3 small">
+            <div class="col-sm-6">
+              <span class="text-muted d-block">Colonia Reportada:</span>
+              <strong class="text-dark fs-6">{{ reporte.nombre_colonia }}</strong>
+              {% if reporte.codigo_postal %}
+                <span class="badge bg-secondary-subtle text-secondary-emphasis">C.P. {{ reporte.codigo_postal }}</span>
+              {% endif %}
+            </div>
+            <div class="col-sm-6">
+              <span class="text-muted d-block">Tipo de Incidencia:</span>
+              <strong class="text-primary fs-6">{{ reporte.tipo_incidencia }}</strong>
+            </div>
+            <div class="col-sm-6">
+              <span class="text-muted d-block">Fecha y Hora de Ingreso:</span>
+              <span class="text-dark fw-semibold">{{ reporte.fecha_hora_reporte }}</span>
+            </div>
+            <div class="col-sm-6">
+              <span class="text-muted d-block">Ciudadano / Contacto:</span>
+              <span class="text-dark">{{ reporte.nombre_ciudadano }} (Tel: {{ reporte.telefono_contacto }})</span>
+            </div>
+            <div class="col-12 pt-2 border-top">
+              <span class="text-muted d-block mb-1">Descripción reportada:</span>
+              <div class="p-2 bg-white rounded border text-secondary fst-italic">
+                "{{ reporte.descripcion }}"
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+          <a href="/" class="btn btn-cmas-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <span>Volver a Consultar</span>
+          </a>
+          <button type="button" class="btn btn-outline-secondary px-3 py-2 d-inline-flex align-items-center gap-2" onclick="window.print()">
+            <i class="bi bi-printer" aria-hidden="true"></i>
+            <span>Imprimir Comprobante</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Ayuda Telefónica -->
+      <div class="text-center text-muted small mt-4">
+        ¿Dudas sobre tu folio? Comunícate a la línea de atención ciudadana CMAS: <strong>(228) 237-0300</strong>.
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

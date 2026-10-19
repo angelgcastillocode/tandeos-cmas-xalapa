@@ -1,0 +1,650 @@
+{% extends "base.html" %}
+
+{% block title %}Centro de Mando Operativo — Supervisión CMAS{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block head_extra %}
+<style>
+  :root {
+    --sup-bg-dark: #0a0f1d;
+    --sup-card-dark: #111827;
+    --sup-card-border: #1f2937;
+    --sup-accent-blue: #0284c7;
+    --sup-accent-cyan: #06b6d4;
+    --sup-accent-red: #ef4444;
+    --sup-accent-amber: #f59e0b;
+    --sup-accent-emerald: #10b981;
+    --sup-text-light: #f3f4f6;
+    --sup-text-muted: #9ca3af;
+  }
+
+  body.bg-cmas-body {
+    background-color: var(--sup-bg-dark) !important;
+    color: var(--sup-text-light) !important;
+  }
+
+  .supervisor-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-bottom: 1px solid var(--sup-card-border);
+  }
+
+  .sup-card {
+    background-color: var(--sup-card-dark);
+    border: 1px solid var(--sup-card-border);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+  }
+
+  .sup-card-header {
+    background-color: rgba(31, 41, 55, 0.5);
+    border-bottom: 1px solid var(--sup-card-border);
+  }
+
+  .stat-card {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .stat-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--sup-accent-cyan);
+  }
+
+  .badge-criticidad-alta {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+  }
+
+  .badge-criticidad-media {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+  }
+
+  .badge-criticidad-resuelta {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+  }
+
+  .sup-table {
+    color: var(--sup-text-light);
+  }
+  .sup-table th {
+    background-color: #1a2234;
+    color: var(--sup-text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-color: var(--sup-card-border);
+  }
+  .sup-table td {
+    background-color: transparent;
+    border-color: var(--sup-card-border);
+    vertical-align: middle;
+  }
+  .sup-table tr:hover td {
+    background-color: rgba(30, 41, 59, 0.6);
+  }
+
+  .filter-input {
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+    border: 1px solid #374151 !important;
+  }
+  .filter-input:focus {
+    border-color: var(--sup-accent-cyan) !important;
+    box-shadow: 0 0 0 0.2rem rgba(6, 182, 212, 0.25) !important;
+  }
+
+  /* Contenedor preparado para coordenadas y mapa desacoplado */
+  #mapa-operativo-cmas {
+    height: 380px;
+    width: 100%;
+    background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+    border: 1px solid var(--sup-card-border);
+    border-radius: 0.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .radar-grid {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, rgba(55, 65, 81, 0.25) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(55, 65, 81, 0.25) 1px, transparent 1px);
+  }
+
+  .sector-node {
+    position: absolute;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--sup-accent-cyan);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .sector-node:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
+  }
+
+  .pulse-beacon {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: var(--sup-accent-red);
+    box-shadow: 0 0 0 rgba(239, 68, 68, 0.7);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Barra de Encabezado Superior -->
+<header class="supervisor-header py-3 px-4 shadow-sm mb-4">
+  <div class="container-fluid d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <div class="d-flex align-items-center gap-3">
+      <div class="p-2 rounded-3 bg-primary bg-opacity-25 text-primary border border-primary border-opacity-50">
+        <i class="bi bi-shield-check fs-3"></i>
+      </div>
+      <div>
+        <div class="d-flex align-items-center gap-2">
+          <h1 class="h5 mb-0 fw-bold text-light">CMAS Xalapa — Centro de Supervisión Técnica</h1>
+          <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-50">Rol Operativo</span>
+        </div>
+        <p class="text-secondary small mb-0">Detección de anomalías, contraste tandeos vs quejas e indicadores por sector</p>
+      </div>
+    </div>
+
+    <!-- Acciones de Usuario -->
+    <div class="d-flex align-items-center gap-3">
+      <div class="text-end d-none d-sm-block">
+        <div class="small fw-semibold text-light">{{ usuario_nombre or 'Personal Técnico' }}</div>
+        <span class="badge bg-secondary bg-opacity-50 text-light py-1 px-2 small">{{ usuario_rol or 'Supervisor' }}</span>
+      </div>
+      <form method="POST" action="{{ url_for('auth.logout') }}" class="m-0">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1" title="Cerrar sesión">
+          <i class="bi bi-box-arrow-right"></i>
+          <span class="d-none d-md-inline">Salir</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</header>
+
+<div class="container-fluid px-4 pb-5">
+
+  <!-- ======================================================================== -->
+  <!-- 1. TARJETAS DE INDICADORES CLAVE (KPIS OPERATIVOS) -->
+  <!-- ======================================================================== -->
+  <div class="row g-3 mb-4">
+    <!-- Total Incidencias -->
+    <div class="col-12 col-sm-6 col-xl-2">
+      <div class="sup-card stat-card p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-secondary small fw-medium">Total Reportes</span>
+          <i class="bi bi-archive text-info fs-5"></i>
+        </div>
+        <div class="h3 fw-bold text-light mb-1">{{ kpis.total_reportes }}</div>
+        <div class="small text-secondary">
+          <span class="text-warning fw-semibold">{{ kpis.abiertos }}</span> abiertos | 
+          <span class="text-info fw-semibold">{{ kpis.en_proceso }}</span> en proceso
+        </div>
+      </div>
+    </div>
+
+    <!-- Reportes Pendientes / Abiertos -->
+    <div class="col-12 col-sm-6 col-xl-2">
+      <div class="sup-card stat-card p-3 h-100 border-start border-4 border-danger">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-secondary small fw-medium">Sin Atender</span>
+          <i class="bi bi-exclamation-diamond text-danger fs-5"></i>
+        </div>
+        <div class="h3 fw-bold text-danger mb-1">{{ kpis.abiertos }}</div>
+        <div class="small text-secondary">Requieren inspección</div>
+      </div>
+    </div>
+
+    <!-- Incidencias Hoy -->
+    <div class="col-12 col-sm-6 col-xl-2">
+      <div class="sup-card stat-card p-3 h-100 border-start border-4 border-warning">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-secondary small fw-medium">Registrados Hoy</span>
+          <i class="bi bi-calendar2-event text-warning fs-5"></i>
+        </div>
+        <div class="h3 fw-bold text-warning mb-1">{{ kpis.hoy }}</div>
+        <div class="small text-secondary">Jornada actual</div>
+      </div>
+    </div>
+
+    <!-- Tasa de Resolución -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="sup-card stat-card p-3 h-100 border-start border-4 border-success">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-secondary small fw-medium">Confiabilidad / Resolución</span>
+          <i class="bi bi-check2-circle text-success fs-5"></i>
+        </div>
+        <div class="d-flex align-items-baseline gap-2 mb-1">
+          <span class="h3 fw-bold text-success mb-0">{{ kpis.tasa_resolucion }}%</span>
+          <span class="small text-secondary">({{ kpis.cerrados }} atendidos)</span>
+        </div>
+        <div class="progress bg-dark" style="height: 6px;">
+          <div class="progress-bar bg-success" role="progressbar" style="width: {{ kpis.tasa_resolucion }}%" aria-valuenow="{{ kpis.tasa_resolucion }}" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Discrepancias Detectadas -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="sup-card stat-card p-3 h-100 border-start border-4 border-info">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-secondary small fw-medium">Discrepancias Tandeo</span>
+          <i class="bi bi-arrow-left-right text-info fs-5"></i>
+        </div>
+        <div class="d-flex align-items-baseline gap-2 mb-1">
+          <span class="h3 fw-bold text-info mb-0">{{ kpis.total_discrepancias }}</span>
+          <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 small">
+            {{ kpis.tasa_discrepancia }}% de quejas
+          </span>
+        </div>
+        <div class="small text-secondary">Falta de agua en días con suministro Activo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================== -->
+  <!-- 2. PANEL DE FILTROS AVANZADOS (DESPLEGABLE / FORMULARIO) -->
+  <!-- ======================================================================== -->
+  <div class="sup-card mb-4">
+    <div class="sup-card-header p-3 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-funnel text-info"></i>
+        <span class="fw-semibold text-light">Filtros Dinámicos de Análisis Operativo</span>
+      </div>
+      <button class="btn btn-sm btn-outline-secondary text-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#panelFiltros" aria-expanded="true" aria-controls="panelFiltros">
+        <i class="bi bi-chevron-expand me-1"></i> Desplegar / Ocultar
+      </button>
+    </div>
+    <div class="collapse show p-3" id="panelFiltros">
+      <form method="GET" action="{{ url_for('supervisor.dashboard') }}" class="row g-3">
+        <!-- Sector -->
+        <div class="col-12 col-sm-6 col-md-3">
+          <label for="filtro_sector" class="form-label text-secondary small fw-medium">Sector Hidráulico</label>
+          <select name="sector" id="filtro_sector" class="form-select form-select-sm filter-input">
+            <option value="">-- Todos los Sectores --</option>
+            {% for s in sectores_catalogo %}
+            <option value="{{ s.id_sector }}" {% if filtros.id_sector == s.id_sector %}selected{% endif %}>
+              {{ s.nombre }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Tipo de Incidencia -->
+        <div class="col-12 col-sm-6 col-md-3">
+          <label for="filtro_tipo" class="form-label text-secondary small fw-medium">Tipo de Incidencia</label>
+          <select name="tipo" id="filtro_tipo" class="form-select form-select-sm filter-input">
+            <option value="">-- Todas las Incidencias --</option>
+            <option value="Falta de agua" {% if filtros.tipo_incidencia == 'Falta de agua' %}selected{% endif %}>Falta de agua</option>
+            <option value="Fuga" {% if filtros.tipo_incidencia == 'Fuga' %}selected{% endif %}>Fuga en red/toma</option>
+            <option value="Baja presión" {% if filtros.tipo_incidencia == 'Baja presión' %}selected{% endif %}>Baja presión</option>
+            <option value="Mantenimiento" {% if filtros.tipo_incidencia == 'Mantenimiento' %}selected{% endif %}>Mantenimiento</option>
+            <option value="Otro" {% if filtros.tipo_incidencia == 'Otro' %}selected{% endif %}>Otro</option>
+          </select>
+        </div>
+
+        <!-- Estado -->
+        <div class="col-12 col-sm-6 col-md-2">
+          <label for="filtro_estado" class="form-label text-secondary small fw-medium">Estado</label>
+          <select name="estado" id="filtro_estado" class="form-select form-select-sm filter-input">
+            <option value="">-- Todos los Estados --</option>
+            <option value="Abierto" {% if filtros.estado == 'Abierto' %}selected{% endif %}>Abierto</option>
+            <option value="En proceso" {% if filtros.estado == 'En proceso' %}selected{% endif %}>En proceso</option>
+            <option value="Cerrado" {% if filtros.estado == 'Cerrado' %}selected{% endif %}>Cerrado</option>
+          </select>
+        </div>
+
+        <!-- Fecha Inicio -->
+        <div class="col-12 col-sm-6 col-md-2">
+          <label for="filtro_f_ini" class="form-label text-secondary small fw-medium">Desde</label>
+          <input type="date" name="fecha_inicio" id="filtro_f_ini" class="form-control form-control-sm filter-input" value="{{ filtros.fecha_inicio or '' }}">
+        </div>
+
+        <!-- Fecha Fin -->
+        <div class="col-12 col-sm-6 col-md-2">
+          <label for="filtro_f_fin" class="form-label text-secondary small fw-medium">Hasta</label>
+          <input type="date" name="fecha_fin" id="filtro_f_fin" class="form-control form-control-sm filter-input" value="{{ filtros.fecha_fin or '' }}">
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="col-12 d-flex justify-content-end gap-2 pt-2 border-top border-secondary border-opacity-25">
+          <a href="{{ url_for('supervisor.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-counterclockwise me-1"></i> Limpiar Filtros
+          </a>
+          <button type="submit" class="btn btn-primary btn-sm px-4 fw-medium">
+            <i class="bi bi-funnel-fill me-1"></i> Aplicar Filtros
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================== -->
+  <!-- 3. MATRIZ DE DISCREPANCIAS Y COMPARATIVA: PROGRAMACIÓN VS REALIDAD -->
+  <!-- ======================================================================== -->
+  <div class="row g-4 mb-4">
+    <!-- Tabla de Discrepancias Operativas -->
+    <div class="col-12 col-xl-7">
+      <div class="sup-card h-100">
+        <div class="sup-card-header p-3 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <span class="pulse-beacon"></span>
+            <h2 class="h6 mb-0 fw-bold text-light">Discrepancias Operativas (Tandeo Programado vs Quejas)</h2>
+          </div>
+          <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50">
+            {{ discrepancias|length }} anomalías
+          </span>
+        </div>
+        <div class="table-responsive">
+          <table class="table sup-table table-hover align-middle mb-0" id="tabla-discrepancias">
+            <thead>
+              <tr>
+                <th>Folio</th>
+                <th>Colonia / Sector</th>
+                <th>Día y Horario Programado</th>
+                <th>Fecha Reporte</th>
+                <th>Estado</th>
+                <th>Diagnóstico</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if discrepancias %}
+                {% for d in discrepancias %}
+                <tr>
+                  <td>
+                    <span class="fw-semibold text-info">{{ d.folio }}</span>
+                  </td>
+                  <td>
+                    <div class="fw-semibold text-light">{{ d.colonia }}</div>
+                    <small class="text-secondary">{{ d.sector }} (CP {{ d.codigo_postal }})</small>
+                  </td>
+                  <td>
+                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">
+                      {{ d.dia_semana }}
+                    </span>
+                    <div class="small text-secondary">{{ d.horario_programado }} hrs</div>
+                  </td>
+                  <td>
+                    <small class="text-light">{{ d.fecha_hora_reporte }}</small>
+                  </td>
+                  <td>
+                    {% if d.estado_reporte == 'Abierto' %}
+                      <span class="badge badge-criticidad-alta">Abierto</span>
+                    {% elif d.estado_reporte == 'En proceso' %}
+                      <span class="badge badge-criticidad-media">En proceso</span>
+                    {% else %}
+                      <span class="badge badge-criticidad-resuelta">Cerrado</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="badge bg-danger text-light small">{{ d.severidad }}</span>
+                  </td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="6" class="text-center py-4 text-secondary">
+                    <i class="bi bi-shield-check text-success fs-2 d-block mb-2"></i>
+                    No se detectan discrepancias entre la programación activa y quejas ciudadanas con los filtros seleccionados.
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sectores Críticos y Tasa de Atención -->
+    <div class="col-12 col-xl-5">
+      <div class="sup-card h-100">
+        <div class="sup-card-header p-3 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-pie-chart text-warning"></i>
+            <h2 class="h6 mb-0 fw-bold text-light">Sectores Críticos de Distribución</h2>
+          </div>
+          <span class="badge bg-secondary bg-opacity-50 text-light">4 Sectores Oficiales</span>
+        </div>
+        <div class="p-3">
+          {% for s in sectores_criticos %}
+          <div class="mb-3 pb-3 border-bottom border-secondary border-opacity-25 last-no-border">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+              <span class="fw-semibold text-light">{{ s.nombre_sector }}</span>
+              <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50">
+                {{ s.abiertos }} abiertos / {{ s.total_reportes }} total
+              </span>
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <div class="progress flex-grow-1 bg-dark" style="height: 6px;">
+                <div class="progress-bar bg-info" role="progressbar" style="width: {{ s.tasa_atencion }}%" aria-valuenow="{{ s.tasa_atencion }}" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              <span class="small text-secondary" style="min-width: 45px;">{{ s.tasa_atencion }}%</span>
+            </div>
+            <div class="d-flex gap-2 small text-secondary">
+              <span><i class="bi bi-droplet-half text-info me-1"></i>Falta agua: {{ s.faltas_agua }}</span>
+              <span><i class="bi bi-tools text-warning me-1"></i>Fugas: {{ s.fugas }}</span>
+              <span><i class="bi bi-speedometer text-secondary me-1"></i>Baja presión: {{ s.bajas_presion }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================== -->
+  <!-- 4. GESTIÓN OPERATIVA DE INCIDENCIAS RECIENTES (CON ACTUALIZACIÓN DE ESTADO) -->
+  <!-- ======================================================================== -->
+  <div class="sup-card mb-4">
+    <div class="sup-card-header p-3 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-table text-info"></i>
+        <h2 class="h6 mb-0 fw-bold text-light">Incidencias Ciudadanas y Gestión Operativa</h2>
+      </div>
+      <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-50">
+        {{ incidencias|length }} registros mostrados
+      </span>
+    </div>
+    <div class="table-responsive">
+      <table class="table sup-table table-hover align-middle mb-0" id="tabla-incidencias">
+        <thead>
+          <tr>
+            <th>Folio</th>
+            <th>Fecha / Hora</th>
+            <th>Colonia / Sector</th>
+            <th>Tipo Incidencia</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th class="text-end">Acción Operativa</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if incidencias %}
+            {% for inc in incidencias %}
+            <tr>
+              <td><span class="fw-bold text-info">{{ inc.folio }}</span></td>
+              <td><small class="text-light">{{ inc.fecha_hora_reporte }}</small></td>
+              <td>
+                <div class="fw-semibold text-light">{{ inc.nombre_colonia }}</div>
+                <small class="text-secondary">{{ inc.nombre_sector }} (CP {{ inc.codigo_postal }})</small>
+              </td>
+              <td>
+                <span class="badge bg-secondary bg-opacity-50 text-light">{{ inc.tipo_incidencia }}</span>
+              </td>
+              <td>
+                <span class="small text-secondary" title="{{ inc.descripcion }}">
+                  {{ inc.descripcion[:65] }}{% if inc.descripcion|length > 65 %}...{% endif %}
+                </span>
+              </td>
+              <td>
+                {% if inc.estado == 'Abierto' %}
+                  <span class="badge badge-criticidad-alta">Abierto</span>
+                {% elif inc.estado == 'En proceso' %}
+                  <span class="badge badge-criticidad-media">En proceso</span>
+                {% else %}
+                  <span class="badge badge-criticidad-resuelta">Cerrado</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <!-- Formulario de cambio de estado rápido con CSRF -->
+                <form method="POST" action="{{ url_for('supervisor.actualizar_estado', id_reporte=inc.id_reporte) }}" class="d-inline-flex gap-1 align-items-center justify-content-end">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <select name="nuevo_estado" class="form-select form-select-sm filter-input" style="width: auto; font-size: 0.75rem;" required>
+                    <option value="Abierto" {% if inc.estado == 'Abierto' %}selected{% endif %}>Abierto</option>
+                    <option value="En proceso" {% if inc.estado == 'En proceso' %}selected{% endif %}>En proceso</option>
+                    <option value="Cerrado" {% if inc.estado == 'Cerrado' %}selected{% endif %}>Cerrado</option>
+                  </select>
+                  <button type="submit" class="btn btn-outline-info btn-sm py-0 px-2" title="Actualizar estado">
+                    <i class="bi bi-save"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-4 text-secondary">
+                No hay incidencias que coincidan con los criterios de búsqueda.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ======================================================================== -->
+  <!-- 5. VISUALIZACIÓN GEOGRÁFICA Y RADAR DE SECTORES (DESACOPLADO) -->
+  <!-- ======================================================================== -->
+  <div class="sup-card mb-4">
+    <div class="sup-card-header p-3 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-geo-alt-fill text-danger"></i>
+        <h2 class="h6 mb-0 fw-bold text-light">Supervisión Territorial y Nodos de Presión Xalapa</h2>
+      </div>
+      <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-50">
+        Lat 19.5438° N | Lon 96.9102° W
+      </span>
+    </div>
+    <div class="p-3">
+      <div id="mapa-operativo-cmas">
+        <div class="radar-grid"></div>
+
+        <!-- Nodo Sector 1: Centro -->
+        <div class="sector-node" style="top: 45%; left: 45%;">
+          <div class="d-flex align-items-center gap-2">
+            <span class="pulse-beacon" style="background-color: #38bdf8;"></span>
+            <div>
+              <strong>Sector 1 — Centro</strong>
+              <div class="text-muted" style="font-size: 0.65rem;">Gravedad Alta (CP 91000)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nodo Sector 2: Oeste -->
+        <div class="sector-node" style="top: 50%; left: 15%;">
+          <div class="d-flex align-items-center gap-2">
+            <span class="pulse-beacon" style="background-color: #f59e0b;"></span>
+            <div>
+              <strong>Sector 2 — Oeste</strong>
+              <div class="text-muted" style="font-size: 0.65rem;">Bombeo Coapexpan (CP 91070)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nodo Sector 3: Este -->
+        <div class="sector-node" style="top: 55%; left: 72%;">
+          <div class="d-flex align-items-center gap-2">
+            <span class="pulse-beacon" style="background-color: #10b981;"></span>
+            <div>
+              <strong>Sector 3 — Este</strong>
+              <div class="text-muted" style="font-size: 0.65rem;">Las Trancas / Ánimas (CP 91190)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nodo Sector 4: Norte -->
+        <div class="sector-node" style="top: 18%; left: 50%;">
+          <div class="d-flex align-items-center gap-2">
+            <span class="pulse-beacon" style="background-color: #ef4444;"></span>
+            <div>
+              <strong>Sector 4 — Norte</strong>
+              <div class="text-muted" style="font-size: 0.65rem;">Tanque Alto Progreso (CP 91130)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leyenda geográfica -->
+        <div class="position-absolute bottom-0 start-0 p-3" style="background: rgba(15, 23, 42, 0.85); border-top-right-radius: 8px;">
+          <div class="small fw-semibold text-light mb-1">Red Hidráulica Municipal Xalapa</div>
+          <div class="small text-secondary" style="font-size: 0.7rem;">Contenedor geográfico desacoplado listo para enlace GIS y coordenadas.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================== -->
+  <!-- 6. BITÁCORA DE ACCIONES RECIENTES -->
+  <!-- ======================================================================== -->
+  {% if bitacora %}
+  <div class="sup-card">
+    <div class="sup-card-header p-3 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-journal-text text-secondary"></i>
+        <h2 class="h6 mb-0 fw-bold text-light">Bitácora de Eventos y Acciones de Supervisión</h2>
+      </div>
+      <span class="small text-secondary">Últimos movimientos registrados</span>
+    </div>
+    <div class="p-3">
+      <ul class="list-unstyled mb-0">
+        {% for b in bitacora %}
+        <li class="d-flex align-items-center justify-content-between py-2 border-bottom border-secondary border-opacity-25 last-no-border">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-clock-history text-info"></i>
+            <div>
+              <span class="fw-semibold text-light">{{ b.accion }}</span>
+              {% if b.folio_reporte %}
+              <span class="badge bg-dark text-info border border-secondary ms-1">Folio: {{ b.folio_reporte }}</span>
+              {% endif %}
+              {% if b.observaciones %}
+              <div class="text-secondary small">{{ b.observaciones }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="text-end">
+            <small class="text-muted">{{ b.fecha_hora }}</small>
+            <div class="small text-secondary">{{ b.nombre_usuario or 'Supervisor' }} ({{ b.rol_usuario or 'Operativo' }})</div>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
