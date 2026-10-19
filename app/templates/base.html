@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Plataforma de Tandeos CMAS{% endblock %}</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <!-- Custom CSS Institucional -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  
+  {% block head_extra %}{% endblock %}
+</head>
+<body class="bg-cmas-body text-cmas-dark">
+  {% block navbar %}
+  <!-- Barra de Navegación Institucional CMAS -->
+  <header class="cmas-navbar sticky-top">
+    <div class="container d-flex justify-content-between align-items-center">
+      <a href="/" class="navbar-brand text-decoration-none d-flex align-items-center gap-2" aria-label="Inicio Plataforma de Tandeos CMAS">
+        <i class="bi bi-droplet-fill text-primary fs-3" aria-hidden="true"></i>
+        <span class="fs-5">Plataforma de Tandeos CMAS</span>
+      </a>
+      <div class="d-flex align-items-center gap-2">
+        {% block navbar_extra %}{% endblock %}
+        {% if current_user.is_authenticated %}
+          <!-- Menú Desplegable de Usuario Autenticado -->
+          <div class="dropdown" id="userMenuDropdown">
+            <button
+              class="btn btn-cmas-user dropdown-toggle d-inline-flex align-items-center gap-2"
+              type="button"
+              id="userDropdownBtn"
+              data-bs-toggle="dropdown"
+              aria-expanded="false">
+              <i class="bi bi-person-circle fs-5" aria-hidden="true"></i>
+              <span class="user-nav-name fw-semibold">
+                {{ current_user.nombre if current_user.nombre else (current_user.correo if current_user.correo else 'Mi Cuenta') }}
+              </span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end cmas-dropdown-menu shadow-lg border-0" aria-labelledby="userDropdownBtn">
+              <li class="dropdown-header text-muted small border-bottom pb-2 mb-1">
+                <i class="bi bi-shield-check text-info me-1"></i>Sesión: <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ current_user.rol or 'Ciudadano' }}</span>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ url_for('notificaciones.obtener_preferencias') }}" id="navMisNotificaciones">
+                  <i class="bi bi-bell-fill text-warning"></i>
+                  <span>Mis Notificaciones</span>
+                </a>
+              </li>
+              {% if current_user.rol == 'Administrador' %}
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ url_for('admin.dashboard') }}">
+                  <i class="bi bi-speedometer2 text-info"></i>
+                  <span>Panel Administrador</span>
+                </a>
+              </li>
+              {% elif current_user.rol in ['Supervisor', 'Tecnico', 'Técnico', 'Operador'] %}
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ url_for('supervisor.dashboard') }}">
+                  <i class="bi bi-tools text-info"></i>
+                  <span>Panel de Supervisión</span>
+                </a>
+              </li>
+              {% endif %}
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <form action="{{ url_for('auth.logout') }}" method="POST" class="m-0 p-0" id="formLogoutNav">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 py-2" id="btnLogoutNav">
+                    <i class="bi bi-box-arrow-right text-danger"></i>
+                    <span>Cerrar sesión</span>
+                  </button>
+                </form>
+              </li>
+            </ul>
+          </div>
+        {% else %}
+          <!-- Botón Iniciar Sesión para Usuario Anónimo -->
+          <a href="{{ url_for('auth.login') }}" class="btn btn-outline-cmas d-inline-flex align-items-center gap-2" id="btnLoginNav">
+            <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
+            <span>Iniciar sesión</span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+  {% endblock %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container" role="status" aria-live="polite">
+        {% for category, msg in messages %}
+          {% set alert_class = 'danger' if category in ['danger', 'error'] else ('warning' if category == 'warning' else ('success' if category == 'success' else 'info')) %}
+          <div class="alert alert-{{ alert_class }} alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+            {% if alert_class == 'danger' %}
+              <i class="bi bi-exclamation-octagon-fill text-danger fs-5"></i>
+            {% elif alert_class == 'warning' %}
+              <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+            {% elif alert_class == 'success' %}
+              <i class="bi bi-check-circle-fill text-success fs-5"></i>
+            {% else %}
+              <i class="bi bi-info-circle-fill text-info fs-5"></i>
+            {% endif %}
+            <div class="flex-grow-1">{{ msg }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="app-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+  </script>
+  
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Reportar Anomalía o Incidencia — CMAS Xalapa{% endblock %}
+
+{% block navbar_extra %}
+<a href="/" class="btn btn-sm btn-outline-cmas d-inline-flex align-items-center gap-1">
+  <i class="bi bi-arrow-left" aria-hidden="true"></i>
+  <span>Volver a Consulta</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Cabecera Institucional Oscura -->
+<section class="cmas-search-hero-dark py-4 text-white">
+  <div class="container">
+    <div class="max-w-600 mx-auto text-center">
+      <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1 small fw-semibold mb-2">
+        <i class="bi bi-megaphone-fill me-1"></i>Atención Ciudadana
+      </span>
+      <h1 class="h3 fw-bold mb-1 text-white">
+        Reportar Anomalía en el Servicio
+      </h1>
+      <p class="text-white-50 small mb-0">
+        Registra una incidencia de suministro, fuga o baja presión para canalizar una cuadrilla técnica de CMAS Xalapa.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Contenedor del Formulario -->
+<div class="container py-4 my-2">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+
+      <!-- Alerta de Error si la validación falló -->
+      {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4 shadow-sm" role="alert">
+          <i class="bi bi-exclamation-octagon-fill fs-5 text-danger" aria-hidden="true"></i>
+          <div class="flex-grow-1 fw-semibold">{{ error }}</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+      {% endif %}
+
+      <!-- Tarjeta del Formulario -->
+      <div class="cmas-info-card p-4 p-md-5 shadow-sm">
+        <div class="border-bottom pb-3 mb-4">
+          <h2 class="h5 fw-bold text-cmas-dark mb-1">
+            <i class="bi bi-clipboard2-pulse me-2 text-primary" aria-hidden="true"></i>Datos de la Incidencia
+          </h2>
+          <span class="text-muted small">Los campos marcados con asterisco (<span class="text-danger">*</span>) son obligatorios.</span>
+        </div>
+
+        <form action="{{ url_for('reportes.enviar_reporte') }}" method="POST" id="formReporteCiudadano" novalidate>
+          
+          <!-- Selector de Colonia -->
+          <div class="mb-3">
+            <label for="id_colonia" class="form-label">
+              Colonia o Localidad <span class="text-danger">*</span>
+            </label>
+            <select name="id_colonia" id="id_colonia" class="form-select form-select-lg" required>
+              <option value="" disabled {% if not colonia_id_seleccionada %}selected{% endif %}>
+                -- Selecciona tu colonia --
+              </option>
+              {% for col in colonias %}
+                <option value="{{ col.id_colonia }}" {% if colonia_id_seleccionada and colonia_id_seleccionada == col.id_colonia %}selected{% endif %}>
+                  {{ col.nombre }} (C.P. {{ col.codigo_postal }})
+                </option>
+              {% endfor %}
+            </select>
+            <div class="form-text text-muted small">
+              Selecciona la colonia donde se ubica la incidencia para vincular el sector hidráulico.
+            </div>
+          </div>
+
+          <!-- Tipo de Incidencia -->
+          <div class="mb-3">
+            <label for="tipo_incidencia" class="form-label">
+              Tipo de Incidencia <span class="text-danger">*</span>
+            </label>
+            <select name="tipo_incidencia" id="tipo_incidencia" class="form-select" required>
+              <option value="" disabled {% if not datos.tipo_incidencia %}selected{% endif %}>
+                -- Selecciona el tipo de falla --
+              </option>
+              {% for tipo in tipos_incidencia %}
+                <option value="{{ tipo }}" {% if datos.tipo_incidencia == tipo %}selected{% endif %}>
+                  {{ tipo }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Descripción Detallada de la Incidencia -->
+          <div class="mb-4">
+            <label for="descripcion" class="form-label">
+              Descripción de la Anomalía <span class="text-danger">*</span>
+            </label>
+            <textarea
+              name="descripcion"
+              id="descripcion"
+              rows="4"
+              class="form-control"
+              placeholder="Detalla la situación (calle, referencias, si ocurre fuera de rol de tandeo, tiempo sin servicio... Mínimo 15 caracteres)"
+              minlength="15"
+              required>{{ datos.descripcion or '' }}</textarea>
+            <div class="form-text text-muted small">
+              Mínimo 15 caracteres. Proporciona referencias de calles o entrecalles.
+            </div>
+          </div>
+
+          <!-- Datos de Contacto Opcionales -->
+          <div class="p-3 bg-light rounded-3 border mb-4">
+            <h3 class="h6 fw-bold text-secondary mb-3">
+              <i class="bi bi-person-badge me-1 text-primary"></i>Datos de Contacto (Opcionales)
+            </h3>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="nombre_ciudadano" class="form-label small fw-semibold">Nombre del Solicitante</label>
+                <input
+                  type="text"
+                  name="nombre_ciudadano"
+                  id="nombre_ciudadano"
+                  class="form-control"
+                  placeholder="Tu nombre (opcional)"
+                  value="{{ datos.nombre_ciudadano or '' }}">
+              </div>
+              <div class="col-md-6">
+                <label for="telefono_contacto" class="form-label small fw-semibold">Teléfono de Contacto</label>
+                <input
+                  type="tel"
+                  name="telefono_contacto"
+                  id="telefono_contacto"
+                  class="form-control"
+                  placeholder="10 dígitos (ej. 2281234567)"
+                  value="{{ datos.telefono_contacto or '' }}">
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-2">
+            <a href="/" class="btn btn-outline-secondary">
+              Cancelar
+            </a>
+            <button type="submit" class="btn btn-cmas-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2" id="btnEnviarReporte">
+              <i class="bi bi-send-fill" aria-hidden="true"></i>
+              <span>Enviar Reporte a CMAS</span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Aviso Institucional -->
+      <div class="text-center text-muted small mt-4">
+        <i class="bi bi-shield-lock me-1"></i>Tus datos están protegidos conforme a la Ley de Protección de Datos Personales del Estado de Veracruz.
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Consulta Ciudadana de Tandeos — CMAS Xalapa{% endblock %}
+
+{% block content %}
+<!-- Hero Section con Buscador -->
+<section class="hero-public text-center" aria-labelledby="heroTitle">
+  <div class="container py-4">
+    <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle px-3 py-2 rounded-pill fw-semibold mb-3">
+      <i class="bi bi-geo-alt-fill me-1"></i>Municipio de Xalapa, Ver.
+    </span>
+    <h1 id="heroTitle" class="hero-public-title mb-3">
+      Consulta el tandeo de agua de tu colonia
+    </h1>
+    <p class="hero-public-subtitle mb-4">
+      Conoce los días programados de suministro de agua potable y los horarios de servicio en tu sector.
+    </p>
+
+    <!-- Formulario del Buscador -->
+    <div class="search-card-container">
+      <form id="formConsulta" action="/consulta" method="GET" role="search" aria-label="Búsqueda de tandeo por colonia o código postal">
+        <div class="search-input-wrapper d-flex align-items-center">
+          <div class="ps-3 text-muted">
+            <i class="bi bi-search fs-5" aria-hidden="true"></i>
+          </div>
+          <input
+            type="search"
+            name="q"
+            id="inputBusqueda"
+            class="form-control search-input"
+            placeholder="Escribe tu colonia o código postal (ej. Centro, 91000)..."
+            autocomplete="off"
+            required
+            aria-label="Nombre de colonia o código postal">
+          <button type="submit" id="btnBuscar" class="btn btn-search-cmas d-inline-flex align-items-center gap-2">
+            <span class="spinner-border spinner-border-sm d-none" id="btnBuscarSpinner" role="status" aria-hidden="true"></span>
+            <span id="btnBuscarTexto">Consultar</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Sugerencias Rápidas de Consulta -->
+      <div class="search-suggestions" aria-label="Búsquedas sugeridas">
+        <span class="text-muted small me-1">Sugerencias:</span>
+        <button type="button" class="btn-suggestion-tag js-sugerencia-tag" data-query="Centro">Centro</button>
+        <button type="button" class="btn-suggestion-tag js-sugerencia-tag" data-query="Las Ánimas">Las Ánimas</button>
+        <button type="button" class="btn-suggestion-tag js-sugerencia-tag" data-query="Coapexpan">Coapexpan</button>
+        <button type="button" class="btn-suggestion-tag js-sugerencia-tag" data-query="91000">C.P. 91000</button>
+        <button type="button" class="btn-suggestion-tag js-sugerencia-tag" data-query="91130">C.P. 91130</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Área de Resultados y Calendario Dinámico -->
+<section class="container py-5" aria-live="polite" aria-atomic="true">
+  
+  <!-- Estado 1: Cargando -->
+  <div id="secCargando" class="text-center py-5 d-none">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+      <span class="visually-hidden">Consultando información del sector...</span>
+    </div>
+    <p class="text-muted mt-3 fw-semibold">Consultando programación de tandeos...</p>
+  </div>
+
+  <!-- Estado 2: Vacio / No encontrado -->
+  <div id="secVacio" class="text-center py-5 d-none">
+    <div class="p-4 mx-auto" style="max-width: 520px; background-color: #FFFFFF; border-radius: 1rem; border: 1px solid var(--cmas-border);">
+      <div class="text-warning mb-3">
+        <i class="bi bi-info-circle-fill" style="font-size: 3rem;" aria-hidden="true"></i>
+      </div>
+      <h2 id="vacioTitulo" class="h4 fw-bold text-cmas-dark mb-2">No encontramos esa colonia o código postal</h2>
+      <p id="vacioMensaje" class="text-muted mb-4">
+        Verifica que el nombre esté bien escrito o prueba ingresando el código postal de 5 dígitos de tu localidad.
+      </p>
+      <div class="text-start bg-light p-3 rounded-3 small">
+        <div class="fw-bold mb-1"><i class="bi bi-lightbulb me-1 text-primary"></i>Consejos para tu búsqueda:</div>
+        <ul class="mb-0 ps-3 text-secondary">
+          <li>Escribe solo el nombre de la colonia sin la palabra "Colonia" o "Fraccionamiento".</li>
+          <li>Puedes consultar directamente por Código Postal (ej. <strong>91000</strong>).</li>
+          <li>Prueba haciendo clic en una de las sugerencias rápidas arriba.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado 3: Éxito (Tarjeta de Sector y Calendario Semanal) -->
+  <div id="secResultado" class="d-none">
+    
+    <!-- Ficha de Datos de la Colonia y Sector -->
+    <div class="sector-info-card p-4 mb-4">
+      <div class="row align-items-center g-3">
+        <div class="col-lg-8">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-secondary-subtle text-secondary-emphasis" id="resCodigoPostal">C.P. 91000</span>
+            <span class="text-muted small">• Sector Oficial CMAS</span>
+          </div>
+          <h2 class="h3 fw-bold text-cmas-dark mb-1" id="resColonia">Nombre Colonia</h2>
+          <div class="text-muted d-flex flex-wrap align-items-center gap-3">
+            <span><i class="bi bi-layers me-1 text-primary"></i><strong id="resSector">Sector 1</strong></span>
+            <span><i class="bi bi-water me-1 text-primary"></i><span id="resRed">Red Gravedad</span></span>
+          </div>
+          {% if colonia %}
+          <div class="mt-3">
+              <a href="{{ url_for('reportes.form_reportar', colonia_id=colonia.id_colonia) }}" class="btn btn-warning fw-bold text-dark shadow-sm">
+                  <i class="bi bi-exclamation-triangle-fill me-1"></i> Reportar anomalía en esta colonia
+              </a>
+          </div>
+          {% else %}
+          <div class="mt-3">
+              <a href="{{ url_for('reportes.form_reportar') }}" class="btn btn-warning fw-bold text-dark shadow-sm" id="btnReportarColonia">
+                  <i class="bi bi-exclamation-triangle-fill me-1"></i> Reportar anomalía en esta colonia
+              </a>
+          </div>
+          {% endif %}
+        </div>
+        <div class="col-lg-4 text-lg-end" id="resDisponibilidad">
+          <!-- Badge dinámico de disponibilidad -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Título de Sección Calendario -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h3 class="h5 fw-bold mb-0 text-cmas-dark">
+          <i class="bi bi-calendar3 me-2 text-primary"></i>Calendario Semanal de Distribución
+        </h3>
+        <p class="text-muted small mb-0">Programación oficial de tandeo de agua potable (Lunes a Domingo)</p>
+      </div>
+    </div>
+
+    <!-- Grilla del Calendario Semanal (7 Días) -->
+    <div id="gridCalendario" class="calendar-grid-week mb-4">
+      <!-- Los 7 días se generan dinámicamente con JavaScript -->
+    </div>
+
+    <!-- Otras colonias en el mismo sector o búsqueda -->
+    <div id="secCoincidencias" class="p-3 bg-white rounded-3 border d-none">
+      <span class="text-muted small fw-semibold me-2">Otras colonias coincidentes:</span>
+      <div id="listaCoincidencias" class="d-inline-flex flex-wrap gap-2 mt-2 mt-md-0"></div>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- Sección Informativa: Cultura del Cuidado del Agua -->
+<section class="container mb-5">
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm p-4 text-center rounded-4">
+        <div class="text-primary mb-3">
+          <i class="bi bi-droplet-half fs-1"></i>
+        </div>
+        <h4 class="h6 fw-bold">Almacenamiento Responsable</h4>
+        <p class="text-muted small mb-0">
+          Llena tinacos y recipientes limpios con tapa previa a los días de corte para evitar la proliferación de mosquitos.
+        </p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm p-4 text-center rounded-4">
+        <div class="text-primary mb-3">
+          <i class="bi bi-bell-fill fs-1"></i>
+        </div>
+        <h4 class="h6 fw-bold">Horarios de Suministro</h4>
+        <p class="text-muted small mb-0">
+          Las maniobras de apertura y cierre de válvulas pueden presentar variaciones menores por presión hidráulica.
+        </p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100 border-0 shadow-sm p-4 text-center rounded-4">
+        <div class="text-primary mb-3">
+          <i class="bi bi-telephone-fill fs-1"></i>
+        </div>
+        <h4 class="h6 fw-bold">Línea de Atención</h4>
+        <p class="text-muted small mb-0">
+          Reporta fugas o anomalías en el servicio marcando al Centro de Atención CMAS: <strong>(228) 237-0300</strong>.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer Institucional -->
+<footer class="cmas-footer" role="contentinfo">
+  <div class="container">
+    <div class="row align-items-center g-3">
+      <div class="col-md-6 text-center text-md-start">
+        <p class="mb-1 fw-semibold text-cmas-dark">
+          <i class="bi bi-droplet-fill text-primary me-1"></i>Comisión Municipal de Agua Potable y Saneamiento de Xalapa
+        </p>
+        <p class="mb-0 text-muted small">
+          © 2026 CMAS Xalapa. Todos los derechos reservados.
+        </p>
+      </div>
+      <div class="col-md-6 text-center text-md-end">
+        <div class="d-inline-flex gap-3 small">
+          <a href="#" class="footer-link">Aviso de Privacidad</a>
+          <span class="text-muted">•</span>
+          <a href="#" class="footer-link">Términos de Servicio</a>
+          <span class="text-muted">•</span>
+          <a href="{{ url_for('auth.login_form') }}" class="footer-link">Acceso a Operadores</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/consulta.js') }}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const resColonia = document.getElementById("resColonia");
+    const btn = document.getElementById("btnReportarColonia");
+    if (resColonia && btn) {
+      const observer = new MutationObserver(async () => {
+        const nom = resColonia.textContent.trim();
+        if (nom && nom !== "Nombre Colonia") {
+          try {
+            const r = await fetch(`/api/v1/tandeos/buscar?q=${encodeURIComponent(nom)}`);
+            const d = await r.json();
+            if (d.success && d.colonia && d.colonia.id_colonia) {
+              btn.href = `{{ url_for('reportes.form_reportar') }}?colonia_id=${d.colonia.id_colonia}`;
+            }
+          } catch (e) {}
+        }
+      });
+      observer.observe(resColonia, { childList: true, subtree: true, characterData: true });
+    }
+  });
+</script>
+{% endblock %}
