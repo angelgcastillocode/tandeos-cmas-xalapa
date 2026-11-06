@@ -1,0 +1,417 @@
+{% extends "base.html" %}
+
+{% block title %}Rastreador de Folios e Incidencias — CMAS Xalapa{% endblock %}
+
+{% block content %}
+<!-- Top Civic Status Ribbon -->
+<section class="w-100 py-2 px-3 text-white shadow-sm" style="background: linear-gradient(90deg, #004e9f 0%, #0066cc 50%, #006398 100%);">
+  <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2" style="font-size: 0.825rem;">
+    <div class="d-flex align-items-center gap-2">
+      <span class="d-inline-block rounded-circle bg-info" style="width: 8px; height: 8px; box-shadow: 0 0 6px #5bb8fe;"></span>
+      <span class="fw-bold text-uppercase tracking-wider">Trazabilidad Operativa de Cuadrillas</span>
+      <span class="opacity-50">|</span>
+      <span class="text-light opacity-90">Fiscalización Ciudadana en Tiempo Real</span>
+    </div>
+    <div class="d-flex align-items-center gap-2 text-white">
+      <span class="material-symbols-outlined" style="font-size: 16px; color: #acedff;">verified</span>
+      <span>Validación Satelital y SCADA</span>
+    </div>
+  </div>
+</section>
+
+<!-- Hero Section con Buscador de Folio -->
+<section class="py-5 text-center position-relative overflow-hidden" style="background: linear-gradient(180deg, #dee8ff 0%, #f0f3ff 60%, #f9f9ff 100%);">
+  <div class="container py-2 position-relative" style="z-index: 2;">
+    
+    <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill bg-white shadow-sm mb-3">
+      <span class="material-symbols-outlined text-primary" style="font-size: 18px;">radar</span>
+      <span class="small fw-semibold text-dark">Módulo Oficial de Fiscalización y Seguimiento Cívico</span>
+    </div>
+
+    <h1 class="display-6 fw-bold text-dark mb-2 tracking-tight" style="color: #111c2d !important;">
+      Rastreador de Incidencias y Folios Hídricos
+    </h1>
+    <p class="text-muted fs-6 max-w-600 mx-auto mb-4">
+      Monitorea al minuto el progreso de cuadrillas operativas en campo sin necesidad de iniciar sesión institucional.
+    </p>
+
+    <!-- Buscador de Folio -->
+    <div class="mx-auto" style="max-width: 680px;">
+      <form action="{{ url_for('reportes.rastreador') }}" method="GET" id="formRastreador" role="search">
+        <div class="d-flex align-items-center bg-white rounded-3 shadow-lg p-1 border">
+          <div class="ps-3 text-muted d-flex align-items-center">
+            <span class="material-symbols-outlined fs-4 text-primary">search</span>
+          </div>
+          <input
+            type="text"
+            name="folio"
+            id="folio-search-input"
+            class="form-control border-0 shadow-none px-3 py-2 fw-bold text-dark font-monospace"
+            placeholder="Ingresa tu número de folio (ej. RPT-2026-ABC12)"
+            value="{{ folio }}"
+            required
+            autocomplete="off"
+            aria-label="Folio del reporte">
+          <button type="submit" id="btn-track-folio" class="btn btn-cmas-primary px-4 py-2 rounded-2 fw-semibold d-inline-flex align-items-center gap-1.5 me-1">
+            <span class="material-symbols-outlined fs-5">radar</span>
+            <span>Rastrear</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mt-3 text-muted smaller">
+        <span class="d-flex align-items-center gap-1">
+          <span class="material-symbols-outlined fs-6 text-primary">sms</span>
+          <span>Folio vía SMS / Correo</span>
+        </span>
+        <span>•</span>
+        <span class="d-flex align-items-center gap-1">
+          <span class="material-symbols-outlined fs-6 text-success">speed</span>
+          <span class="fw-semibold text-dark">Tiempo promedio de atención: 4.2 hrs</span>
+        </span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Contenido del Reporte Rastreado -->
+<div class="container py-4 my-2">
+
+  {% if busqueda_realizada and not reporte %}
+    <!-- Caso: Folio no encontrado -->
+    <div class="cmas-empty-state-card mx-auto text-center p-4 p-md-5 my-3 shadow-sm bg-white rounded-4 border">
+      <div class="text-warning mb-3">
+        <span class="material-symbols-outlined text-warning" style="font-size: 56px;">search_off</span>
+      </div>
+      <h2 class="h4 fw-bold text-dark mb-2">No se encontró el folio solicitado</h2>
+      <p class="text-muted small max-w-500 mx-auto mb-4">
+        No pudimos encontrar ningún reporte registrado con el folio <strong>"{{ folio }}"</strong>. Verifica que esté escrito con el formato <code>RPT-2026-XXXXX</code>.
+      </p>
+      <div class="d-flex flex-wrap justify-content-center gap-2">
+        <a href="{{ url_for('reportes.rastreador') }}" class="btn btn-outline-secondary btn-sm px-3 rounded-pill">
+          Intentar otra búsqueda
+        </a>
+        <a href="{{ url_for('reportes.form_reportar') }}" class="btn btn-cmas-primary btn-sm px-3 rounded-pill">
+          Levantar un nuevo reporte
+        </a>
+      </div>
+    </div>
+
+  {% elif reporte %}
+    <!-- Caso: Reporte Encontrado y Activo -->
+    {% set est = (reporte.estado or 'Abierto')|lower %}
+    <div class="bg-white rounded-4 shadow-sm border p-4 mb-4 position-relative overflow-hidden">
+      <!-- Borde de estado lateral -->
+      <div class="position-absolute start-0 top-0 bottom-0" style="width: 6px; background-color: {% if est in ['resuelto', 'cerrado'] %}#16a34a{% elif est in ['en proceso', 'asignado'] %}#0066cc{% else %}#d97706{% endif %};"></div>
+      
+      <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3 ps-2">
+        <div>
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+            <h2 class="h4 fw-bold text-dark mb-0 font-monospace">Folio #{{ reporte.folio }}</h2>
+            {% if est in ['resuelto', 'cerrado'] %}
+              <span class="badge rounded-pill px-3 py-1.5 bg-success-subtle text-success fw-bold d-inline-flex align-items-center gap-1">
+                <span class="material-symbols-outlined fs-6">check_circle</span>
+                <span>Fase Final: Resuelto</span>
+              </span>
+            {% elif est in ['en proceso', 'asignado'] %}
+              <span class="badge rounded-pill px-3 py-1.5 text-white fw-bold d-inline-flex align-items-center gap-1" style="background-color: #0066cc;">
+                <span class="d-inline-block rounded-circle bg-white" style="width: 7px; height: 7px;"></span>
+                <span>Fase Activa: En Reparación</span>
+              </span>
+            {% else %}
+              <span class="badge rounded-pill px-3 py-1.5 bg-warning-subtle text-warning-emphasis fw-bold d-inline-flex align-items-center gap-1">
+                <span class="material-symbols-outlined fs-6">schedule</span>
+                <span>Fase Inicial: En Evaluación</span>
+              </span>
+            {% endif %}
+            <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1">
+              Sector Hidráulico CMAS
+            </span>
+          </div>
+
+          <!-- Metadatos de la incidencia -->
+          <div class="row g-3 mt-1 small">
+            <div class="col-sm-6 col-md-3">
+              <span class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.7rem;">Tipo de Incidencia</span>
+              <strong class="text-dark d-flex align-items-center gap-1 mt-0.5">
+                <span class="material-symbols-outlined text-primary fs-6">water_damage</span>
+                <span>{{ reporte.tipo_incidencia }}</span>
+              </strong>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <span class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.7rem;">Ubicación Reportada</span>
+              <strong class="text-dark d-flex align-items-center gap-1 mt-0.5">
+                <span class="material-symbols-outlined text-danger fs-6">location_on</span>
+                <span>{{ reporte.nombre_colonia }} {% if reporte.codigo_postal %}(C.P. {{ reporte.codigo_postal }}){% endif %}</span>
+              </strong>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <span class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.7rem;">Fecha de Registro</span>
+              <span class="text-dark d-flex align-items-center gap-1 mt-0.5">
+                <span class="material-symbols-outlined text-muted fs-6">calendar_today</span>
+                <span>{{ reporte.fecha_hora_reporte }}</span>
+              </span>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <span class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.7rem;">Cuadrilla Operativa</span>
+              <span class="text-dark d-flex align-items-center gap-1 mt-0.5">
+                <span class="material-symbols-outlined text-success fs-6">engineering</span>
+                <span>Unidad Hidráulica CMAS-03</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de Acción Rápida -->
+        <div class="d-flex flex-wrap align-items-center gap-2 pt-2 pt-lg-0 shrink-0">
+          <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1 rounded-2" onclick="copiarFolio('{{ reporte.folio }}')">
+            <span class="material-symbols-outlined fs-6">content_copy</span>
+            <span id="btnCopiarTexto">Copiar Folio</span>
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1 rounded-2" onclick="window.print()">
+            <span class="material-symbols-outlined fs-6">print</span>
+            <span>Imprimir</span>
+          </button>
+          <a href="tel:073" class="btn btn-cmas-primary btn-sm d-inline-flex align-items-center gap-1 rounded-2">
+            <span class="material-symbols-outlined fs-6">support_agent</span>
+            <span>Línea 073</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stepper / Pipeline de 5 Fases Oficiales CMAS -->
+    <div class="bg-white rounded-4 shadow-sm border p-4 mb-4">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-4">
+        <div>
+          <h3 class="h5 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-primary">linear_scale</span>
+            <span>Línea de Vida Operativa de la Atención</span>
+          </h3>
+          <p class="text-muted smaller mb-0">Progreso de maniobras validado mediante telemetría SCADA y bitácora técnica CMAS.</p>
+        </div>
+        <div class="badge bg-light text-dark border px-3 py-1.5 d-flex align-items-center gap-1">
+          <span class="d-inline-block rounded-circle bg-success" style="width: 7px; height: 7px;"></span>
+          <span class="smaller">Actualizado vía Telemetría Oficial</span>
+        </div>
+      </div>
+
+      <!-- Grid de 5 Pasos -->
+      <div class="tracking-pipeline-grid">
+        
+        <!-- Fase 1: Recibido -->
+        <div class="pipeline-step-card {% if est in ['resuelto', 'cerrado', 'en proceso', 'asignado', 'abierto'] %}completed{% else %}pending{% endif %}">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 28px; height: 28px; background-color: #16a34a;">
+              <span class="material-symbols-outlined fs-6">check</span>
+            </span>
+            <span class="smaller fw-bold text-success">FASE 1</span>
+          </div>
+          <strong class="text-dark small mb-0.5">Recibido</strong>
+          <span class="text-muted smaller">Ingreso en plataforma CMAS C-4</span>
+          <div class="mt-auto pt-2 smaller text-muted opacity-75">Completado</div>
+        </div>
+
+        <!-- Fase 2: En Evaluación -->
+        <div class="pipeline-step-card {% if est in ['resuelto', 'cerrado', 'en proceso', 'asignado'] %}completed{% elif est == 'abierto' %}active{% else %}pending{% endif %}">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 28px; height: 28px; background-color: {% if est in ['resuelto', 'cerrado', 'en proceso', 'asignado'] %}#16a34a{% else %}#004e9f{% endif %};">
+              <span class="material-symbols-outlined fs-6">{% if est in ['resuelto', 'cerrado', 'en proceso', 'asignado'] %}check{% else %}analytics{% endif %}</span>
+            </span>
+            <span class="smaller fw-bold {% if est in ['resuelto', 'cerrado', 'en proceso', 'asignado'] %}text-success{% else %}text-white{% endif %}">FASE 2</span>
+          </div>
+          <strong class="small mb-0.5 {% if est == 'abierto' %}text-white{% else %}text-dark{% endif %}">En Evaluación</strong>
+          <span class="smaller {% if est == 'abierto' %}text-white opacity-90{% else %}text-muted{% endif %}">Sector hidrométrico validado</span>
+          <div class="mt-auto pt-2 smaller {% if est == 'abierto' %}text-white{% else %}text-muted{% endif %}">{% if est == 'abierto' %}En curso{% else %}Completado{% endif %}</div>
+        </div>
+
+        <!-- Fase 3: Cuadrilla Asignada -->
+        <div class="pipeline-step-card {% if est in ['resuelto', 'cerrado'] %}completed{% elif est in ['en proceso', 'asignado'] %}completed{% else %}pending{% endif %}">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 28px; height: 28px; background-color: {% if est in ['resuelto', 'cerrado', 'en proceso', 'asignado'] %}#16a34a{% else %}#64748b{% endif %};">
+              <span class="material-symbols-outlined fs-6">{% if est in ['resuelto', 'cerrado', 'en proceso', 'asignado'] %}check{% else %}engineering{% endif %}</span>
+            </span>
+            <span class="smaller fw-bold {% if est in ['resuelto', 'cerrado', 'en proceso', 'asignado'] %}text-success{% else %}text-muted{% endif %}">FASE 3</span>
+          </div>
+          <strong class="text-dark small mb-0.5">Cuadrilla Asignada</strong>
+          <span class="text-muted smaller">Unidad Zona Sur 03 asignada</span>
+          <div class="mt-auto pt-2 smaller text-muted">{% if est in ['resuelto', 'cerrado', 'en proceso', 'asignado'] %}Completado{% else %}Pendiente{% endif %}</div>
+        </div>
+
+        <!-- Fase 4: En Reparación / En Curso -->
+        <div class="pipeline-step-card {% if est in ['resuelto', 'cerrado'] %}completed{% elif est in ['en proceso', 'asignado'] %}active{% else %}pending{% endif %}">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 28px; height: 28px; background-color: {% if est in ['resuelto', 'cerrado'] %}#16a34a{% elif est in ['en proceso', 'asignado'] %}#004e9f{% else %}#64748b{% endif %};">
+              <span class="material-symbols-outlined fs-6">{% if est in ['resuelto', 'cerrado'] %}check{% else %}handyman{% endif %}</span>
+            </span>
+            <span class="smaller fw-bold {% if est in ['resuelto', 'cerrado'] %}text-success{% elif est in ['en proceso', 'asignado'] %}text-white{% else %}text-muted{% endif %}">FASE 4</span>
+          </div>
+          <strong class="small mb-0.5 {% if est in ['en proceso', 'asignado'] %}text-white{% else %}text-dark{% endif %}">En Reparación</strong>
+          <span class="smaller {% if est in ['en proceso', 'asignado'] %}text-white opacity-90{% else %}text-muted{% endif %}">Maniobras en red o válvula en sitio</span>
+          <div class="mt-auto pt-2 smaller {% if est in ['en proceso', 'asignado'] %}text-white{% else %}text-muted{% endif %}">{% if est in ['en proceso', 'asignado'] %}En maniobra activa{% elif est in ['resuelto', 'cerrado'] %}Completado{% else %}Pendiente{% endif %}</div>
+        </div>
+
+        <!-- Fase 5: Finalizado y Cerrado -->
+        <div class="pipeline-step-card {% if est in ['resuelto', 'cerrado'] %}completed{% else %}pending{% endif %}">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 28px; height: 28px; background-color: {% if est in ['resuelto', 'cerrado'] %}#16a34a{% else %}#64748b{% endif %};">
+              <span class="material-symbols-outlined fs-6">task_alt</span>
+            </span>
+            <span class="smaller fw-bold {% if est in ['resuelto', 'cerrado'] %}text-success{% else %}text-muted{% endif %}">FASE 5</span>
+          </div>
+          <strong class="text-dark small mb-0.5">Finalizado y Cerrado</strong>
+          <span class="text-muted smaller">Prueba de carga y acta ciudadana</span>
+          <div class="mt-auto pt-2 smaller text-muted">{% if est in ['resuelto', 'cerrado'] %}Concluido con éxito{% else %}Pendiente{% endif %}</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Detalles Técnicos y Descripción Registrada -->
+    <div class="row g-4 mb-4">
+      <div class="col-lg-6">
+        <div class="bg-white rounded-4 shadow-sm border p-4 h-100">
+          <h4 class="h6 fw-bold text-dark d-flex align-items-center gap-1.5 mb-3">
+            <span class="material-symbols-outlined text-primary fs-5">description</span>
+            <span>Descripción de la Incidencia</span>
+          </h4>
+          <div class="p-3 bg-light rounded-3 border text-secondary fst-italic mb-3">
+            "{{ reporte.descripcion }}"
+          </div>
+          <div class="smaller text-muted">
+            <span class="d-block mb-1"><strong>Reportado por:</strong> {{ reporte.nombre_ciudadano }}</span>
+            <span class="d-block"><strong>Contacto registrado:</strong> {{ reporte.telefono_contacto }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="bg-white rounded-4 shadow-sm border p-4 h-100">
+          <h4 class="h6 fw-bold text-dark d-flex align-items-center gap-1.5 mb-3">
+            <span class="material-symbols-outlined text-primary fs-5">monitoring</span>
+            <span>Parámetros Hidráulicos de la Zona</span>
+          </h4>
+          <div class="d-flex flex-column gap-2 smaller">
+            <div class="d-flex justify-content-between p-2 rounded-2" style="background-color: #f0f3ff;">
+              <span class="text-muted">Presión promedio en ramal:</span>
+              <strong class="text-dark">2.4 kg/cm² (Estable)</strong>
+            </div>
+            <div class="d-flex justify-content-between p-2 rounded-2" style="background-color: #f0f3ff;">
+              <span class="text-muted">Válvula de seccionamiento:</span>
+              <strong class="text-dark">V-SUR-08 (100% Apertura)</strong>
+            </div>
+            <div class="d-flex justify-content-between p-2 rounded-2" style="background-color: #f0f3ff;">
+              <span class="text-muted">Tanque distribuidor:</span>
+              <strong class="text-primary">Tanque Elevado Regulador Xallitic</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  {% endif %}
+
+  <!-- Sección: Historial de "Mis Reportes Levantados" -->
+  <div class="bg-white rounded-4 shadow-sm border p-4 mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 pb-3 border-bottom mb-3">
+      <div>
+        <h3 class="h5 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+          <span class="material-symbols-outlined text-primary">folder_shared</span>
+          <span>Mis Reportes Levantados</span>
+        </h3>
+        <p class="text-muted smaller mb-0">Historial de incidencias asociadas a tu sesión ciudadana.</p>
+      </div>
+      <div>
+        <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill font-semibold">
+          {{ mis_reportes|length }} Reporte(s)
+        </span>
+      </div>
+    </div>
+
+    {% if current_user.is_authenticated and mis_reportes and mis_reportes|length > 0 %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light smaller text-muted text-uppercase">
+            <tr>
+              <th scope="col" class="border-0">Folio / Tipo</th>
+              <th scope="col" class="border-0">Colonia</th>
+              <th scope="col" class="border-0">Fecha</th>
+              <th scope="col" class="border-0">Estatus</th>
+              <th scope="col" class="border-0 text-end">Acción</th>
+            </tr>
+          </thead>
+          <tbody class="small">
+            {% for rep in mis_reportes %}
+              <tr>
+                <td>
+                  <strong class="text-primary font-monospace d-block">#{{ rep.folio }}</strong>
+                  <span class="text-muted smaller">{{ rep.tipo_incidencia }}</span>
+                </td>
+                <td>
+                  <span class="text-dark fw-medium">{{ rep.nombre_colonia }}</span>
+                </td>
+                <td>
+                  <span class="text-muted">{{ rep.fecha_hora_reporte }}</span>
+                </td>
+                <td>
+                  {% set r_est = (rep.estado or 'Abierto')|lower %}
+                  {% if r_est in ['resuelto', 'cerrado'] %}
+                    <span class="badge bg-success-subtle text-success">Resuelto</span>
+                  {% elif r_est in ['en proceso', 'asignado'] %}
+                    <span class="badge text-white" style="background-color: #0066cc;">En reparación</span>
+                  {% else %}
+                    <span class="badge bg-warning-subtle text-warning-emphasis">Abierto</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <a href="{{ url_for('reportes.rastreador', folio=rep.folio) }}" class="btn btn-sm btn-cmas-primary px-3 rounded-2">
+                    Ver Seguimiento
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% elif current_user.is_authenticated %}
+      <div class="text-center py-4 text-muted small">
+        <span class="material-symbols-outlined fs-2 text-muted mb-2 d-block">inbox</span>
+        No tienes reportes levantados actualmente con tu cuenta.
+      </div>
+    {% else %}
+      <div class="p-4 rounded-3 text-center" style="background-color: #f0f3ff; border: 1px dashed #c1c6d5;">
+        <span class="material-symbols-outlined text-primary fs-2 mb-2">lock</span>
+        <h4 class="h6 fw-bold text-dark mb-1">¿Deseas ver todos tus folios en un solo lugar?</h4>
+        <p class="text-muted smaller mb-3 max-w-500 mx-auto">
+          Inicia sesión con tu cuenta ciudadana para acceder automáticamente al historial unificado de tus reportes y recibir avisos por correo.
+        </p>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-cmas btn-sm px-4 rounded-pill">
+          Iniciar sesión ciudadana
+        </a>
+      </div>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function copiarFolio(folio) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(folio).then(() => {
+        const btnTexto = document.getElementById("btnCopiarTexto");
+        if (btnTexto) {
+          const original = btnTexto.textContent;
+          btnTexto.textContent = "¡Copiado!";
+          setTimeout(() => {
+            btnTexto.textContent = original;
+          }, 2000);
+        }
+      });
+    }
+  }
+</script>
+{% endblock %}

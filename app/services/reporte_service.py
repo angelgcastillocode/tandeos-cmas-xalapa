@@ -132,6 +132,12 @@ class ReporteService:
             return None
         return self._repo.obtener_por_folio(folio)
 
+    def obtener_reportes_por_usuario(self, id_usuario: int) -> List[Dict[str, Any]]:
+        """Recupera todos los reportes levantados por un usuario específico."""
+        if not id_usuario:
+            return []
+        return self._repo.obtener_por_usuario(id_usuario)
+
     def obtener_colonias_para_formulario(self) -> List[Dict[str, Any]]:
         """Obtiene el catálogo de colonias registradas para poblar el <select> del formulario."""
         return self._repo.listar_colonias()

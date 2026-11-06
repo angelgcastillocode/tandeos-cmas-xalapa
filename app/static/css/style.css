@@ -1,17 +1,26 @@
 :root {
-  --cmas-primary: #0066CC;
-  --cmas-primary-hover: #004E9C;
-  --cmas-bg-body: #F4F7FB;
-  --cmas-card-bg: #FFFFFF;
-  --cmas-text: #333333;
-  --cmas-muted: #6C757D;
-  --cmas-border: #E2E8F0;
+  --cmas-primary: #004e9f;
+  --cmas-primary-container: #0066cc;
+  --cmas-primary-hover: #003b7a;
+  --cmas-bg-body: #f4f7fb;
+  --cmas-card-bg: #ffffff;
+  --cmas-text: #111c2d;
+  --cmas-muted: #64748b;
+  --cmas-border: #e2e8f0;
+  --cmas-border-focus: #0066cc;
+  --cmas-focus-ring: rgba(0, 102, 204, 0.25);
+  --cmas-success: #16a34a;
+  --cmas-success-bg: #dcfce7;
+  --cmas-danger: #dc2626;
+  --cmas-danger-bg: #fee2e2;
+  --cmas-warning: #d97706;
+  --cmas-warning-bg: #fef3c7;
 }
 
 body.bg-cmas-body {
   background-color: var(--cmas-bg-body);
   color: var(--cmas-text);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   min-height: 100vh;
 }
 
@@ -717,5 +726,253 @@ body.bg-cmas-body {
 .cmas-coincidencias-box {
   background-color: #FFFFFF;
 }
+
+/* ==========================================================================
+   COMPONENTES CIVICOS STITCH — CMAS XALAPA
+   ========================================================================== */
+
+/* Enlaces de Barra de Navegación */
+.nav-link-cmas {
+  color: #414753;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.nav-link-cmas:hover {
+  color: #004e9f;
+  background-color: #f0f3ff;
+}
+
+.nav-link-cmas:active {
+  background-color: #dee8ff;
+}
+
+.nav-link-cmas.active {
+  color: #004e9f;
+  background-color: #e7eeff;
+  font-weight: 700;
+}
+
+/* Estados Interactivos Generales :hover, :focus, :active */
+.btn-cmas-primary {
+  background-color: var(--cmas-primary-container);
+  color: #ffffff;
+  border: 1px solid transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-cmas-primary:hover {
+  background-color: var(--cmas-primary-hover);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.25);
+}
+
+.btn-cmas-primary:active {
+  background-color: #003366;
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-cmas-primary:focus-visible {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+.btn-outline-cmas {
+  border: 1.5px solid var(--cmas-primary);
+  color: var(--cmas-primary);
+  background-color: transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-cmas:hover {
+  background-color: var(--cmas-primary);
+  color: #ffffff;
+}
+
+.btn-outline-cmas:active {
+  background-color: var(--cmas-primary-hover);
+  color: #ffffff;
+}
+
+.btn-outline-cmas:focus-visible {
+  outline: 2px solid var(--cmas-primary);
+  outline-offset: 2px;
+}
+
+/* Botones de sugerencias rápidas (chips) */
+.btn-suggestion-tag {
+  background-color: #f0f3ff;
+  color: #004e9f;
+  border: 1px solid #dee8ff;
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-suggestion-tag:hover {
+  background-color: #0066cc;
+  color: #ffffff;
+  border-color: #0066cc;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 102, 204, 0.2);
+}
+
+.btn-suggestion-tag:active {
+  background-color: #004e9f;
+  transform: translateY(0);
+}
+
+/* Pipeline / Stepper de Fases del Rastreador de Folio */
+.tracking-pipeline-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 991px) {
+  .tracking-pipeline-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pipeline-step-card {
+  padding: 1.25rem 1rem;
+  border-radius: 0.75rem;
+  background-color: #f0f3ff;
+  border: 1px solid #dee8ff;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.pipeline-step-card.completed {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.pipeline-step-card.active {
+  background-color: #0066cc;
+  color: #ffffff;
+  border-color: #004e9f;
+  box-shadow: 0 4px 14px rgba(0, 102, 204, 0.3);
+}
+
+.pipeline-step-card.active .text-on-surface,
+.pipeline-step-card.active .text-on-surface-variant {
+  color: #ffffff !important;
+}
+
+.pipeline-step-card.pending {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  opacity: 0.75;
+}
+
+/* Tarjetas Selectables de Tipo de Incidencia */
+.incident-type-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.incident-card-option {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.incident-card-option:hover {
+  border-color: #0066cc;
+  background-color: #f0f3ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 102, 204, 0.1);
+}
+
+.incident-card-option.selected {
+  border-color: #0066cc;
+  background-color: #e7eeff;
+  box-shadow: 0 0 0 2px #0066cc;
+}
+
+.incident-card-option:focus-visible {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+/* Contador de Caracteres */
+.char-counter-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  transition: color 0.2s ease;
+}
+
+.char-counter-badge.valid {
+  color: #16a34a;
+}
+
+.char-counter-badge.limit {
+  color: #dc2626;
+}
+
+/* Responsive Mobile Calendar Improvements */
+@media (max-width: 767px) {
+  .calendar-grid-week {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .day-schedule-card {
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  }
+}
+
+/* Estilos de Impresión (@media print) */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  .cmas-top-ribbon,
+  .cmas-navbar,
+  .cmas-footer,
+  .btn,
+  header,
+  footer,
+  #btn-track-folio,
+  .no-print {
+    display: none !important;
+  }
+  
+  .cmas-info-card,
+  .auth-card {
+    border: 1px solid #000000 !important;
+    box-shadow: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+}
+
 
 
