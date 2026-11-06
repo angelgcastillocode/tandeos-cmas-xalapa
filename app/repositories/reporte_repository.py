@@ -109,6 +109,63 @@ class ReporteRepository:
             "codigo_postal": row["codigo_postal"] or "",
         }
 
+    def obtener_por_usuario(self, id_usuario: int) -> List[Dict[str, Any]]:
+        """Recupera todos los reportes levantados por un usuario específico."""
+        db = get_db()
+        cur_check = db.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='colonias'"
+        )
+        usa_colonias_nuevas = cur_check.fetchone() is not None
+
+        if usa_colonias_nuevas:
+            rows = db.execute(
+                """
+                SELECT 
+                    rc.id_reporte, rc.folio, rc.id_colonia, rc.tipo_incidencia,
+                    rc.descripcion, rc.nombre_ciudadano, rc.telefono_contacto,
+                    rc.id_usuario, rc.fecha_hora_reporte, rc.estado,
+                    c.nombre AS nombre_colonia, c.codigo_postal
+                FROM reportes_ciudadanos rc
+                LEFT JOIN colonias c ON rc.id_colonia = c.id_colonia
+                WHERE rc.id_usuario = ?
+                ORDER BY rc.fecha_hora_reporte DESC
+                """,
+                (id_usuario,),
+            ).fetchall()
+        else:
+            rows = db.execute(
+                """
+                SELECT 
+                    rc.id_reporte, rc.folio, rc.id_colonia, rc.tipo_incidencia,
+                    rc.descripcion, rc.nombre_ciudadano, rc.telefono_contacto,
+                    rc.id_usuario, rc.fecha_hora_reporte, rc.estado,
+                    c.nombre_colonia, c.codigo_postal
+                FROM reportes_ciudadanos rc
+                LEFT JOIN Colonia c ON rc.id_colonia = c.id_colonia
+                WHERE rc.id_usuario = ?
+                ORDER BY rc.fecha_hora_reporte DESC
+                """,
+                (id_usuario,),
+            ).fetchall()
+
+        return [
+            {
+                "id_reporte": r["id_reporte"],
+                "folio": r["folio"],
+                "id_colonia": r["id_colonia"],
+                "tipo_incidencia": r["tipo_incidencia"],
+                "descripcion": r["descripcion"],
+                "nombre_ciudadano": r["nombre_ciudadano"] or "Anónimo",
+                "telefono_contacto": r["telefono_contacto"] or "No proporcionado",
+                "id_usuario": r["id_usuario"],
+                "fecha_hora_reporte": r["fecha_hora_reporte"],
+                "estado": r["estado"],
+                "nombre_colonia": r["nombre_colonia"] or "Colonia no especificada",
+                "codigo_postal": r["codigo_postal"] or "",
+            }
+            for r in rows
+        ]
+
     def existe_folio(self, folio: str) -> bool:
         """Comprueba si un folio ya se encuentra registrado para evitar colisiones."""
         db = get_db()
