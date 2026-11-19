@@ -45,27 +45,28 @@
                 {{ current_user.nombre if current_user.nombre else (current_user.correo if current_user.correo else 'Mi Cuenta') }}
               </span>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end cmas-dropdown-menu shadow-lg border-0" aria-labelledby="userDropdownBtn">
-              <li class="dropdown-header text-muted small border-bottom pb-2 mb-1">
-                <i class="bi bi-shield-check text-info me-1"></i>Sesión: <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ current_user.rol or 'Ciudadano' }}</span>
+            <ul class="dropdown-menu dropdown-menu-end cmas-dropdown-menu" aria-labelledby="userDropdownBtn">
+              <li class="dropdown-header d-flex align-items-center justify-content-between gap-2 pb-2 mb-1">
+                <span><i class="bi bi-shield-check me-1" aria-hidden="true"></i>Sesión:</span>
+                <span class="badge cmas-role-badge">{{ current_user.rol or 'Ciudadano' }}</span>
               </li>
               <li>
                 <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ url_for('notificaciones.obtener_preferencias') }}" id="navMisNotificaciones">
-                  <i class="bi bi-bell-fill text-warning"></i>
+                  <i class="bi bi-bell-fill" aria-hidden="true"></i>
                   <span>Mis Notificaciones</span>
                 </a>
               </li>
               {% if current_user.rol == 'Administrador' %}
               <li>
                 <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ url_for('admin.dashboard') }}">
-                  <i class="bi bi-speedometer2 text-info"></i>
+                  <i class="bi bi-speedometer2" aria-hidden="true"></i>
                   <span>Panel Administrador</span>
                 </a>
               </li>
               {% elif current_user.rol in ['Supervisor', 'Tecnico', 'Técnico', 'Operador'] %}
               <li>
                 <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ url_for('supervisor.dashboard') }}">
-                  <i class="bi bi-tools text-info"></i>
+                  <i class="bi bi-tools" aria-hidden="true"></i>
                   <span>Panel de Supervisión</span>
                 </a>
               </li>
@@ -74,8 +75,8 @@
               <li>
                 <form action="{{ url_for('auth.logout') }}" method="POST" class="m-0 p-0" id="formLogoutNav">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                  <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 py-2" id="btnLogoutNav">
-                    <i class="bi bi-box-arrow-right text-danger"></i>
+                  <button type="submit" class="dropdown-item cmas-dropdown-logout d-flex align-items-center gap-2 py-2" id="btnLogoutNav">
+                    <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
                     <span>Cerrar sesión</span>
                   </button>
                 </form>
