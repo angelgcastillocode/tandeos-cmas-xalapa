@@ -119,3 +119,52 @@ def reporte_exito(folio: str):
         "public/reporte_exito.html",
         reporte=reporte,
     ), 200
+
+
+@reporte_bp.route("/rastreador", methods=["GET"])
+def rastreador():
+    """Pantalla de Rastreador de Folio y Mis Reportes."""
+    folio_raw = request.args.get("folio", "")
+    service = _get_service()
+    reporte = None
+    folio_buscado = ""
+
+    if folio_raw:
+        es_val, folio_limpio, _ = validar_folio(folio_raw)
+        if es_val and folio_limpio:
+            folio_buscado = folio_limpio
+            reporte = service.obtener_reporte_por_folio(folio_limpio)
+
+    # Si hay usuario autenticado, obtener sus reportes
+    mis_reportes = []
+    id_usuario = session.get("usuario_id")
+    if id_usuario:
+        mis_reportes = service.obtener_reportes_por_usuario(id_usuario)
+
+    return render_template(
+        "public/rastreador.html",
+        folio=folio_buscado,
+        reporte=reporte,
+        mis_reportes=mis_reportes,
+        busqueda_realizada=bool(folio_raw),
+    ), 200
+
+
+@reporte_bp.route("/api/reportes/rastrear", methods=["GET"])
+def api_rastrear_reporte():
+    """Endpoint REST JSON para consulta asíncrona de folio de reporte."""
+    folio_raw = request.args.get("folio", "")
+    if not folio_raw:
+        return {"success": False, "error": "Folio no proporcionado"}, 400
+
+    es_val, folio_limpio, _ = validar_folio(folio_raw)
+    if not es_val or not folio_limpio:
+        return {"success": False, "error": "Formato de folio inválido"}, 400
+
+    service = _get_service()
+    reporte = service.obtener_reporte_por_folio(folio_limpio)
+    if not reporte:
+        return {"success": False, "error": "No se encontró ningún reporte con ese folio"}, 404
+
+    return {"success": True, "reporte": reporte}, 200
+

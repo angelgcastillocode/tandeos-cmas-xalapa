@@ -303,31 +303,45 @@
             const esHoy = normalizar(item.dia_semana) === normalizar(diaHoyNombre);
             const est = (item.estado_servicio || "").toLowerCase();
             const card = document.createElement("div");
-            card.className = `day-schedule-card status-${est} ${esHoy ? "today" : ""}`;
+            card.className = `day-schedule-card status-${est} ${esHoy ? "today" : ""} p-3 rounded-4 bg-white shadow-sm border position-relative overflow-hidden`;
 
-            let badgeHtml = "";
+            const barColor = item.estado_servicio === "Activo" ? "#16a34a" : (item.estado_servicio === "Mantenimiento" ? "#d97706" : "#dc2626");
+            const iconName = item.estado_servicio === "Activo" ? "water_drop" : (item.estado_servicio === "Mantenimiento" ? "construction" : "block");
+            const estadoTexto = item.estado_servicio === "Activo" ? "Servicio Regular" : (item.estado_servicio === "Mantenimiento" ? "Mantenimiento" : "Corte por Tandeo");
+            const badgeCls = item.estado_servicio === "Activo" ? "badge-status-activo" : (item.estado_servicio === "Mantenimiento" ? "badge-status-mantenimiento" : "badge-status-suspendido");
+            const pressMetric = item.estado_servicio === "Activo" ? "2.4 kg/cm²" : (item.estado_servicio === "Mantenimiento" ? "1.1 bar" : "0.0 bar");
+
             let horaHtml = "";
-
             if (item.estado_servicio === "Activo") {
-              badgeHtml = '<span class="badge badge-status-activo px-2 py-1 w-100"><i class="bi bi-droplet-fill me-1"></i>Servicio Suministrado</span>';
-              horaHtml = `<i class="bi bi-clock me-1 text-success"></i>${item.hora_inicio} - ${item.hora_fin} hrs`;
+              horaHtml = `<div class="text-success fw-bold smaller"><span class="material-symbols-outlined fs-6 align-middle">schedule</span> ${item.hora_inicio} - ${item.hora_fin} hrs</div><div class="text-muted smaller mt-1">Suministro continuo en red</div>`;
             } else if (item.estado_servicio === "Mantenimiento") {
-              badgeHtml = '<span class="badge badge-status-mantenimiento px-2 py-1 w-100"><i class="bi bi-tools me-1"></i>Mantenimiento en Red</span>';
-              horaHtml = `<i class="bi bi-clock-history me-1 text-warning"></i>${item.hora_inicio} - ${item.hora_fin} hrs`;
+              horaHtml = `<div class="text-warning-emphasis fw-bold smaller"><span class="material-symbols-outlined fs-6 align-middle">schedule</span> ${item.hora_inicio} - ${item.hora_fin} hrs</div><div class="text-muted smaller mt-1">Ventana operativa</div>`;
             } else {
-              badgeHtml = '<span class="badge badge-status-suspendido px-2 py-1 w-100"><i class="bi bi-slash-circle me-1"></i>Corte por Tandeo</span>';
-              horaHtml = '<span class="text-danger fw-semibold"><i class="bi bi-x-circle me-1"></i>Sin servicio</span>';
+              horaHtml = `<div class="text-danger fw-semibold smaller"><span class="material-symbols-outlined fs-6 align-middle">block</span> Cierre de válvulas</div><div class="text-muted smaller mt-1">Utilice reservas domiciliarias</div>`;
             }
 
             card.innerHTML = `
-              <div>
+              <div class="position-absolute start-0 end-0 top-0" style="height: 5px; background-color: ${barColor};"></div>
+              <div class="pt-1">
                 <div class="d-flex align-items-center justify-content-between mb-1">
-                  <span class="day-title">${item.dia_semana}</span>
-                  ${esHoy ? '<span class="badge bg-primary text-white small px-2 py-0">Hoy</span>' : ""}
+                  <span class="day-title text-capitalize fw-bold text-dark fs-6">${item.dia_semana}</span>
+                  ${esHoy ? '<span class="badge bg-primary text-white smaller px-2 py-0.5 rounded-pill">Hoy</span>' : ""}
                 </div>
-                <div>${badgeHtml}</div>
+                <div class="mb-2">
+                  <span class="badge ${badgeCls} w-100 py-1.5 d-inline-flex align-items-center justify-content-center gap-1">
+                    <span class="material-symbols-outlined fs-6">${iconName}</span>
+                    <span>${estadoTexto}</span>
+                  </span>
+                </div>
               </div>
-              <div class="schedule-hours mt-3">${horaHtml}</div>
+              <div class="schedule-hours mt-auto">${horaHtml}</div>
+              <div class="day-card-footer pt-2 mt-2 border-top text-muted smaller d-flex justify-content-between align-items-center">
+                <span>${pressMetric}</span>
+                <span class="d-flex align-items-center gap-0.5">
+                  <span class="material-symbols-outlined fs-6 text-primary">verified</span>
+                  <span>CMAS</span>
+                </span>
+              </div>
             `;
             gridCalendario.appendChild(card);
           });
