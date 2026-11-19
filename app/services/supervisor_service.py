@@ -7,7 +7,8 @@ detección de discrepancias en tandeos y gestión de estados de incidencias.
 from typing import Dict, Any, List, Optional, Tuple
 from app.repositories.supervisor_repository import SupervisorRepository
 
-ROLES_SUPERVISOR_PERMITIDOS = {"Supervisor", "Tecnico", "Técnico", "Operador"}
+ROLES_SUPERVISOR_PERMITIDOS = {"Supervisor", "Tecnico", "Técnico", "Operador", "Administrador"}
+_ROLES_SUPERVISOR_LOWER = {r.lower() for r in ROLES_SUPERVISOR_PERMITIDOS}
 ESTADOS_REPORTE_PERMITIDOS = {"Abierto", "En proceso", "Cerrado"}
 
 
@@ -19,12 +20,13 @@ class SupervisorService:
 
     def validar_acceso_supervisor(self, rol: Optional[str]) -> bool:
         """
-        Valida que el usuario posea credencial operativa ('Supervisor' o 'Técnico').
+        Valida que el usuario posea credencial operativa ('Supervisor', 'Técnico',
+        'Operador') o jerárquica ('Administrador').
         Bloquea a usuarios con rol 'Ciudadano' o no autenticados.
         """
-        if not rol:
+        if not rol or not isinstance(rol, str):
             return False
-        return rol in ROLES_SUPERVISOR_PERMITIDOS
+        return rol.strip().lower() in _ROLES_SUPERVISOR_LOWER
 
     def normalizar_filtros(self, raw_filtros: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         """Limpia y valida los parámetros de filtro ingresados en la interfaz o petición."""

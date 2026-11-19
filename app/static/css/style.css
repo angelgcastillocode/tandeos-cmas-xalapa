@@ -261,26 +261,30 @@ body.bg-cmas-body {
   box-shadow: 0 4px 10px rgba(0, 102, 204, 0.2);
 }
 
-/* Botón y Dropdown de Usuario Autenticado en Navbar */
+/* Botón y Dropdown de Usuario Autenticado en Navbar (Tema Claro Institucional) */
 .btn-cmas-user {
-  background: linear-gradient(135deg, #0b1329 0%, #172554 100%);
-  color: #f8fafc;
-  border: 1px solid rgba(6, 182, 212, 0.4);
+  background-color: #004A99;
+  color: #FFFFFF;
+  border: 1px solid #004A99;
   font-weight: 600;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   padding: 0.42rem 0.95rem;
-  transition: all 0.25s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
 .btn-cmas-user:hover,
 .btn-cmas-user:focus,
 .btn-cmas-user.show {
-  background: linear-gradient(135deg, #172554 0%, #0369a1 100%);
-  color: #ffffff;
-  border-color: #06b6d4;
-  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35);
-  transform: translateY(-1px);
+  background-color: #00346F;
+  color: #FFFFFF;
+  border-color: #00346F;
+  box-shadow: 0 2px 6px rgba(0, 74, 153, 0.2);
+}
+
+.btn-cmas-user:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 74, 153, 0.25);
 }
 
 .btn-cmas-user .user-nav-name {
@@ -290,15 +294,15 @@ body.bg-cmas-body {
   white-space: nowrap;
 }
 
-/* Menú Desplegable con Paleta Institucional Oscura (Cian / Ámbar) */
+/* Menú Desplegable con Paleta Clara Institucional */
 .cmas-dropdown-menu {
-  background-color: #0b1329;
-  border: 1px solid rgba(6, 182, 212, 0.35) !important;
-  border-radius: 0.75rem;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
   padding: 0.5rem;
   min-width: 250px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.18) !important;
-  animation: dropdownFadeIn 0.2s ease-out;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+  animation: dropdownFadeIn 0.18s ease-out;
 }
 
 @keyframes dropdownFadeIn {
@@ -313,45 +317,72 @@ body.bg-cmas-body {
 }
 
 .cmas-dropdown-menu .dropdown-header {
-  color: #94a3b8;
-  font-size: 0.78rem;
+  color: #64748B;
+  font-size: 0.75rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: 1px solid #E2E8F0;
+  padding: 0.45rem 0.75rem;
+}
+
+.cmas-dropdown-menu .dropdown-header i {
+  color: #004A99;
+}
+
+.cmas-dropdown-menu .cmas-role-badge {
+  background-color: #EBF5FF;
+  color: #004A99;
+  border: 1px solid #BFDBFE;
+  font-weight: 600;
+  font-size: 0.72rem;
+  padding: 0.22rem 0.55rem;
+  border-radius: 9999px;
 }
 
 .cmas-dropdown-menu .dropdown-item {
-  color: #e2e8f0;
+  color: #0F172A;
   font-size: 0.9rem;
   font-weight: 500;
   padding: 0.55rem 0.85rem;
-  border-radius: 0.4rem;
-  transition: all 0.2s ease;
+  border-radius: 8px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.cmas-dropdown-menu .dropdown-item i {
+  color: #004A99;
 }
 
 .cmas-dropdown-menu .dropdown-item:hover,
 .cmas-dropdown-menu .dropdown-item:focus {
-  background-color: rgba(6, 182, 212, 0.18);
-  color: #38bdf8;
-  transform: translateX(3px);
+  background-color: #EBF5FF;
+  color: #004A99;
 }
 
-.cmas-dropdown-menu .dropdown-item i.bi-bell-fill {
-  color: #f59e0b !important;
-}
-
-.cmas-dropdown-menu .dropdown-item:hover i.bi-bell-fill {
-  color: #fbbf24 !important;
-  text-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+.cmas-dropdown-menu .dropdown-item:hover i,
+.cmas-dropdown-menu .dropdown-item:focus i {
+  color: #004A99;
 }
 
 .cmas-dropdown-menu .dropdown-divider {
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: #E2E8F0;
+  opacity: 1;
 }
 
-.cmas-dropdown-menu button.dropdown-item.text-danger:hover {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #f87171 !important;
+.cmas-dropdown-menu .cmas-dropdown-logout,
+.cmas-dropdown-menu .cmas-dropdown-logout i {
+  color: #DC2626;
+}
+
+.cmas-dropdown-menu .cmas-dropdown-logout:hover,
+.cmas-dropdown-menu .cmas-dropdown-logout:focus {
+  background-color: #FEF2F2;
+  color: #DC2626;
+}
+
+.cmas-dropdown-menu .cmas-dropdown-logout:hover i,
+.cmas-dropdown-menu .cmas-dropdown-logout:focus i {
+  color: #DC2626;
 }
 
 /* Hero Section */
